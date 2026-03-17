@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fretboard Lord — Guitar Scale & Harmony Practice</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0; min-height: 100vh; padding: 16px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 {
+            text-align: center; margin-bottom: 4px; font-size: 28px;
+            background: linear-gradient(135deg, #00d4ff 0%, #7928ca 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .subtitle { text-align: center; color: #888; margin-bottom: 20px; font-size: 13px; }
+        .controls {
+            display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap;
+            justify-content: center; align-items: flex-end;
+        }
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        .control-group label {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; color: #7928ca;
+        }
+        select, .toggle-btn, .mode-btn {
+            padding: 8px 12px; background: #0f3460; border: 1px solid #7928ca;
+            color: #e0e0e0; border-radius: 6px; font-size: 13px; cursor: pointer;
+            transition: all 0.2s ease; font-weight: 600;
+        }
+        select:hover, .toggle-btn:hover, .mode-btn:hover {
+            border-color: #00d4ff; box-shadow: 0 0 8px rgba(0,212,255,0.2);
+        }
+        .mode-btn.active, .toggle-btn.active {
+            background: #7928ca; border-color: #00d4ff; box-shadow: 0 0 12px rgba(121,40,202,0.5);
+        }
+        .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .panel {
+            background: #0f3460; border: 1px solid rgba(121,40,202,0.4);
+            border-radius: 8px; padding: 20px; margin-bottom: 20px;
+        }
+        .panel-title {
+            font-size: 14px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: #7928ca; margin-bottom: 12px;
+        }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .info-box {
+            background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px;
+            border-left: 3px solid #7928ca; font-size: 13px; line-height: 1.6;
+        }
+        .info-box.paired-box { border-left-color: #ffb703; }
+        .info-box .box-title { font-weight: 700; margin-bottom: 4px; font-size: 13px; }
+        .info-box .box-notes { color: #a0a0a0; font-family: 'Courier New', monospace; font-size: 12px; }
+        .info-box .box-formula { color: #666; font-size: 11px; margin-top: 4px; }
+
+        /* ===== FRETBOARD STATIC GRID ===== */
+        .fretboard-wrap { overflow-x: auto; padding-bottom: 8px; }
+        .fb { min-width: 720px; user-select: none; }
+        .fb-fret-numbers { display: flex; padding-left: 46px; margin-bottom: 0; }
+        .fb-fret-num {
+            width: 44px; text-align: center; font-size: 10px; color: #555;
+            font-weight: 600; flex-shrink: 0; height: 18px; line-height: 18px;
+        }
+        .fb-fret-num.marker { color: #7928ca; }
+        .fb-body { position: relative; }
+        .fb-string-row { display: flex; align-items: stretch; height: 38px; position: relative; z-index: 1; }
+        .fb-open {
+            width: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+            border-right: 4px solid #bbb; background: transparent;
+        }
+        .fb-open-dot {
+            width: 30px; height: 30px; border-radius: 50%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; position: relative; z-index: 2;
+        }
+        .fb-open-dot .note-name, .fb-note .note-name {
+            font-size: 10px; font-weight: 700; line-height: 1.1; color: #fff;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+        .fb-open-dot .note-name { font-size: 11px; }
+        .fb-open-dot .interval-name, .fb-note .interval-name {
+            font-size: 7px; font-weight: 600; line-height: 1; color: rgba(255,255,255,0.85);
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+        .fb-frets-area { display: flex; flex-grow: 1; position: relative; }
+        .fb-wire {
+            position: absolute; top: 50%; left: 0; right: 0; height: 2px;
+            transform: translateY(-50%); pointer-events: none; z-index: 1;
+        }
+        .fb-wire-inner {
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, #999 0%, #666 100%); opacity: 0.7;
+        }
+        .fb-cell {
+            width: 44px; flex-shrink: 0; height: 100%;
+            border-right: 2px solid #555; display: flex; align-items: center; justify-content: center;
+            position: relative; z-index: 2; background: transparent;
+        }
+        .fb-note {
+            width: 32px; height: 32px; border-radius: 50%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: transform 0.15s ease; position: relative; z-index: 3;
+        }
+        .fb-note:hover { transform: scale(1.15); }
+        .fb-markers { display: flex; padding-left: 46px; height: 14px; }
+        .fb-marker-cell {
+            width: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+        }
+        .fb-marker-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1);
+        }
+        .fb-marker-double { display: flex; gap: 6px; }
+
+        .clr-root   { background: #ff006e; box-shadow: 0 0 10px rgba(255,0,110,0.6); }
+        .clr-scale  { background: #8338ec; box-shadow: 0 0 8px rgba(131,56,236,0.5); }
+        .clr-paired { background: #00d4ff; box-shadow: 0 0 8px rgba(0,212,255,0.5); }
+        .clr-shared { background: linear-gradient(135deg, #8338ec 0%, #00d4ff 100%);
+                      box-shadow: 0 0 10px rgba(100,150,255,0.6); border: 2px solid #00d4ff; }
+        .clr-rel-root { background: #ffb703; box-shadow: 0 0 10px rgba(255,183,3,0.6); }
+
+        .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+        .legend-item {
+            display: flex; align-items: center; gap: 8px; padding: 6px 12px;
+            background: rgba(0,0,0,0.25); border-radius: 6px; font-size: 12px;
+        }
+        .legend-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+
+        /* ===== CHORD LIBRARY ===== */
+        .cl-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+        .cl-tab {
+            padding: 6px 14px; background: rgba(0,0,0,0.25); border: 1px solid rgba(121,40,202,0.3);
+            color: #aaa; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;
+        }
+        .cl-tab:hover { border-color: #00d4ff; color: #e0e0e0; }
+        .cl-tab.active { background: #7928ca; border-color: #00d4ff; color: #fff; }
+        .cl-degree-section { margin-bottom: 16px; }
+        .cl-degree-header {
+            font-size: 13px; font-weight: 700; color: #7928ca; margin-bottom: 8px;
+            padding-bottom: 4px; border-bottom: 1px solid rgba(121,40,202,0.2);
+        }
+        .cl-chord-btns { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+        .cl-chord-btn {
+            padding: 5px 12px; background: #0f3460; border: 1px solid rgba(121,40,202,0.3);
+            color: #e0e0e0; border-radius: 6px; font-size: 12px; cursor: pointer;
+            font-weight: 600; transition: all 0.2s ease;
+        }
+        .cl-chord-btn:hover { border-color: #00d4ff; }
+        .cl-chord-btn.active { background: #7928ca; border-color: #00d4ff; }
+        .cl-chord-detail {
+            background: rgba(0,0,0,0.2); border-radius: 8px; padding: 14px; margin-bottom: 14px;
+        }
+        .cl-chord-info {
+            display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 14px;
+            font-size: 12px; color: #aaa;
+        }
+        .cl-chord-info strong { color: #e0e0e0; }
+        .cl-voicings { display: flex; gap: 12px; flex-wrap: wrap; }
+        /* Chord diagram */
+        .cd {
+            display: inline-flex; flex-direction: column; align-items: center;
+            background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px 10px 10px;
+            width: 112px; flex-shrink: 0;
+        }
+        .cd-pos { font-size: 10px; color: #888; margin-bottom: 3px; font-weight: 600; }
+        .cd-marks { display: flex; width: 84px; margin-bottom: 2px; }
+        .cd-mark { width: 14px; text-align: center; font-size: 10px; color: #888; font-weight: 700; }
+        .cd-grid {
+            display: grid; grid-template-columns: repeat(6, 14px);
+            border-top: 3px solid #888;
+        }
+        .cd-grid.no-nut { border-top: 1px solid #555; }
+        .cd-gcell {
+            width: 14px; height: 20px; border-right: 1px solid #444; border-bottom: 1px solid #555;
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .cd-gcell:nth-child(6n+1) { border-left: 1px solid #444; }
+        .cd-gdot {
+            width: 11px; height: 11px; border-radius: 50%; background: #8338ec; z-index: 1;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 6px; font-weight: 700; color: #fff;
+        }
+        .cd-gdot.root { background: #ff006e; }
+        .cd-fret-label {
+            font-size: 9px; color: #666; margin-top: 2px; text-align: center;
+        }
+
+        /* ===== REVERSE CHORD FINDER ===== */
+        .rcf-fretboard .fb-cell { cursor: pointer; }
+        .rcf-fretboard .fb-cell:hover { background: rgba(121,40,202,0.15); }
+        .rcf-fretboard .fb-open { cursor: pointer; }
+        .rcf-fretboard .fb-open:hover { background: rgba(121,40,202,0.1); }
+        .rcf-placed {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #06d6a0; box-shadow: 0 0 10px rgba(6,214,160,0.6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 700; color: #fff;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            position: relative; z-index: 3; cursor: pointer;
+        }
+        .rcf-results {
+            margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;
+        }
+        .rcf-match {
+            padding: 8px 14px; background: rgba(0,0,0,0.3); border-radius: 6px;
+            border: 1px solid rgba(6,214,160,0.3); font-size: 13px;
+        }
+        .rcf-match.best { border-color: #06d6a0; background: rgba(6,214,160,0.1); }
+        .rcf-match .chord-name { font-weight: 700; color: #06d6a0; }
+        .rcf-match .chord-formula { font-size: 11px; color: #888; margin-top: 2px; }
+        .rcf-raw { font-size: 12px; color: #888; margin-top: 10px; }
+
+        /* ===== HARMONIZED FULL-NECK VIEW ===== */
+        .harm-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: flex-end; }
+        .harm-controls .control-group { gap: 4px; }
+        .harm-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .harm-legend-item {
+            display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+            background: rgba(0,0,0,0.25); border-radius: 6px; font-size: 11px;
+        }
+        .harm-legend-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+        .chord-clr-0 { background: #ff006e; box-shadow: 0 0 8px rgba(255,0,110,0.5); }
+        .chord-clr-1 { background: #ff6b35; box-shadow: 0 0 8px rgba(255,107,53,0.5); }
+        .chord-clr-2 { background: #ffb703; box-shadow: 0 0 8px rgba(255,183,3,0.5); }
+        .chord-clr-3 { background: #06d6a0; box-shadow: 0 0 8px rgba(6,214,160,0.5); }
+        .chord-clr-4 { background: #00d4ff; box-shadow: 0 0 8px rgba(0,212,255,0.5); }
+        .chord-clr-5 { background: #8338ec; box-shadow: 0 0 8px rgba(131,56,236,0.5); }
+        .chord-clr-6 { background: #c77dff; box-shadow: 0 0 8px rgba(199,125,255,0.5); }
+        .harm-sg-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+
+        /* ===== PLAY BUTTONS ===== */
+        .play-btn {
+            width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(0,212,255,0.4);
+            background: rgba(0,212,255,0.1); color: #00d4ff; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 12px; transition: all 0.2s ease; flex-shrink: 0;
+        }
+        .play-btn:hover { background: rgba(0,212,255,0.3); border-color: #00d4ff; transform: scale(1.1); }
+        .play-btn.playing { background: #00d4ff; color: #1a1a2e; }
+        .play-btn-sm {
+            width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(0,212,255,0.3);
+            background: rgba(0,212,255,0.08); color: #00d4ff; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 10px; transition: all 0.15s ease; flex-shrink: 0;
+        }
+        .play-btn-sm:hover { background: rgba(0,212,255,0.25); transform: scale(1.1); }
+        .cd .play-btn-sm { margin-top: 4px; }
+
+        /* ===== MIC & PRACTICE MODE ===== */
+        .mic-btn {
+            padding: 8px 14px; border-radius: 6px; border: 1px solid #7928ca;
+            background: #0f3460; color: #e0e0e0; cursor: pointer; font-weight: 600;
+            font-size: 13px; transition: all 0.2s ease;
+        }
+        .mic-btn:hover { border-color: #00d4ff; }
+        .mic-btn.active { background: #06d6a0; border-color: #06d6a0; color: #1a1a2e; }
+        .practice-btn {
+            padding: 8px 14px; border-radius: 6px; border: 1px solid #ffb703;
+            background: rgba(255,183,3,0.1); color: #ffb703; cursor: pointer; font-weight: 600;
+            font-size: 13px; transition: all 0.2s ease;
+        }
+        .practice-btn:hover { background: rgba(255,183,3,0.2); }
+        .practice-btn.active { background: #ffb703; color: #1a1a2e; }
+        .mic-hud {
+            position: fixed; top: 12px; right: 12px; background: rgba(15,52,96,0.95);
+            border: 1px solid rgba(0,212,255,0.4); border-radius: 10px; padding: 10px 16px;
+            font-size: 12px; z-index: 100; min-width: 180px; backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .mic-hud-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #7928ca; font-weight: 700; margin-bottom: 6px; }
+        .mic-hud-note { font-size: 22px; font-weight: 700; color: #00d4ff; }
+        .mic-hud-freq { font-size: 11px; color: #888; margin-top: 2px; }
+        .mic-hud-match { font-size: 11px; margin-top: 4px; }
+        .mic-hud-match.hit { color: #06d6a0; }
+        .mic-hud-match.miss { color: #ff6b6b; }
+
+        /* ===== PRACTICE PANEL ===== */
+        .practice-panel {
+            background: rgba(255,183,3,0.05); border: 1px solid rgba(255,183,3,0.3);
+            border-radius: 8px; padding: 16px; margin-bottom: 20px;
+        }
+        .practice-panel-title {
+            font-size: 14px; font-weight: 700; color: #ffb703; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .practice-controls {
+            display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px;
+        }
+        .practice-controls select, .practice-controls input {
+            padding: 6px 10px; background: #0f3460; border: 1px solid rgba(255,183,3,0.3);
+            color: #e0e0e0; border-radius: 6px; font-size: 12px;
+        }
+        .practice-controls input[type="range"] { width: 100px; }
+        .practice-status {
+            display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+            font-size: 13px; padding: 10px 14px; background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+        }
+        .practice-status .stat-label { color: #888; font-size: 11px; }
+        .practice-status .stat-value { font-weight: 700; color: #ffb703; font-size: 16px; }
+        .practice-status .stat-value.hit { color: #06d6a0; }
+        .skip-btn {
+            padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05); color: #aaa; cursor: pointer;
+            font-size: 12px; font-weight: 600; transition: all 0.2s ease;
+        }
+        .skip-btn:hover { border-color: #ffb703; color: #ffb703; }
+
+        /* ===== PRACTICE VISUAL FEEDBACK ===== */
+        @keyframes pulse-gold {
+            0%, 100% { box-shadow: 0 0 8px rgba(255,183,3,0.4); }
+            50% { box-shadow: 0 0 20px rgba(255,183,3,0.9), 0 0 40px rgba(255,183,3,0.3); }
+        }
+        @keyframes flash-green {
+            0% { box-shadow: 0 0 30px rgba(6,214,160,0.9); transform: scale(1.2); }
+            100% { box-shadow: 0 0 8px rgba(6,214,160,0.3); transform: scale(1); }
+        }
+        @keyframes flash-red {
+            0% { box-shadow: 0 0 20px rgba(255,107,107,0.8); }
+            100% { box-shadow: none; }
+        }
+        .practice-target {
+            animation: pulse-gold 1s ease-in-out infinite;
+            outline: 2px solid #ffb703; outline-offset: 2px;
+        }
+        .practice-hit {
+            background: #06d6a0 !important; animation: flash-green 0.4s ease-out forwards;
+        }
+        .practice-miss { animation: flash-red 0.3s ease-out; }
+
+        .practice-check {
+            position: absolute; top: -4px; right: -4px; width: 14px; height: 14px;
+            background: #06d6a0; border-radius: 50%; font-size: 9px; color: #fff;
+            display: flex; align-items: center; justify-content: center; font-weight: 700;
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: 1fr; }
+            body { padding: 10px; }
+            h1 { font-size: 22px; }
+            .mic-hud { top: auto; bottom: 12px; right: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Fretboard Lord</h1>
+    <p class="subtitle">Guitar Scale & Harmony Practice Tool</p>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Root Note</label>
+            <select id="rootSelect"></select>
+        </div>
+        <div class="control-group">
+            <label>Scale Type</label>
+            <select id="scaleSelect">
+                <option value="major">Major Scale</option>
+                <option value="naturalMinor">Natural Minor Scale</option>
+                <option value="minorPentatonic" selected>Minor Pentatonic</option>
+                <option value="majorPentatonic">Major Pentatonic</option>
+                <option value="blues">Blues Scale</option>
+                <option value="harmonicMinor">Harmonic Minor</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Display</label>
+            <div class="btn-group" id="modeButtons"></div>
+        </div>
+        <div class="control-group">
+            <label>Options</label>
+            <div class="btn-group">
+                <button class="toggle-btn active" id="toggleNotes">Notes</button>
+                <button class="toggle-btn active" id="toggleIntervals">Intervals</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <label>Audio</label>
+            <div class="btn-group">
+                <button class="mic-btn" id="micToggle" onclick="toggleMic()">Mic Off</button>
+                <button class="practice-btn" id="practiceToggle" onclick="togglePractice()">Practice</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="practicePanel" style="display:none;"></div>
+
+    <div class="panel" id="theoryPanel"></div>
+
+    <div class="panel">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
+            <div class="panel-title" style="margin-bottom:0;">Fretboard</div>
+            <button class="play-btn" onclick="playCurrentScale()" title="Play scale">&#9654;</button>
+        </div>
+        <div class="fretboard-wrap"><div class="fb" id="fretboard"></div></div>
+        <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="panel" id="chordLibPanel">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
+            <div class="panel-title" style="margin-bottom:0;">Chord Library</div>
+            <div class="btn-group">
+                <button class="mode-btn active" id="tabLibrary" onclick="setCLMode('library')">Diatonic Chords</button>
+                <button class="mode-btn" id="tabReverse" onclick="setCLMode('reverse')">Reverse Chord Finder</button>
+            </div>
+        </div>
+        <div id="chordLibContent"></div>
+    </div>
+
+    <div class="panel" id="harmPanel">
+        <div class="panel-title">Harmonized Scale — Full Neck View</div>
+        <div id="harmContent"></div>
+    </div>
+</div>
+
+<div class="mic-hud" id="micHud" style="display:none;">
+    <div class="mic-hud-title">Pitch Detection</div>
+    <div class="mic-hud-note" id="micNote">—</div>
+    <div class="mic-hud-freq" id="micFreq">Listening...</div>
+    <div class="mic-hud-match" id="micMatch"></div>
+</div>
+
+<script>
+// =====================================================================
+// CONSTANTS
+// =====================================================================
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const ENHARMONIC = {'C#':'Db','D#':'Eb','F#':'Gb','G#':'Ab','A#':'Bb'};
+const STRINGS = [
+    {name:'E',midi:64},{name:'B',midi:59},{name:'G',midi:55},
+    {name:'D',midi:50},{name:'A',midi:45},{name:'E',midi:40}
+];
+const NUM_FRETS = 15;
+const FRET_MARKERS = [3,5,7,9,12,15];
+const DOUBLE_DOT_FRETS = [12];
+
+const SCALE_DEFS = {
+    major:          {semitones:[0,2,4,5,7,9,11], intervals:['R','M2','M3','P4','P5','M6','M7'], formula:'W-W-H-W-W-W-H', name:'Major Scale'},
+    naturalMinor:   {semitones:[0,2,3,5,7,8,10], intervals:['R','M2','m3','P4','P5','m6','m7'], formula:'W-H-W-W-H-W-W', name:'Natural Minor Scale'},
+    harmonicMinor:  {semitones:[0,2,3,5,7,8,11], intervals:['R','M2','m3','P4','P5','m6','M7'], formula:'W-H-W-W-H-W½-H', name:'Harmonic Minor'},
+    minorPentatonic:{semitones:[0,3,5,7,10],      intervals:['R','m3','P4','P5','m7'],           formula:'m3-W-W-m3-W', name:'Minor Pentatonic'},
+    majorPentatonic:{semitones:[0,2,4,7,9],        intervals:['R','M2','M3','P5','M6'],           formula:'W-W-m3-W-m3', name:'Major Pentatonic'},
+    blues:          {semitones:[0,3,5,6,7,10],     intervals:['R','m3','P4','b5','P5','m7'],      formula:'m3-W-H-H-m3-W', name:'Blues Scale'}
+};
+
+const TRIAD_INTERVALS = {maj:[0,4,7],min:[0,3,7],dim:[0,3,6],aug:[0,4,8]};
+const TRIAD_SUFFIX = {maj:'',min:'m',dim:'°',aug:'+'};
+const TRIAD_LABELS = {maj:'Major',min:'Minor',dim:'Dim',aug:'Aug'};
+const MAJOR_TRIAD_PATTERN = ['maj','min','min','maj','maj','min','dim'];
+const MINOR_TRIAD_PATTERN = ['min','dim','maj','min','min','maj','maj'];
+const HARMONIC_MINOR_TRIAD_PATTERN = ['min','dim','aug','min','maj','maj','dim'];
+const DEGREE_LABELS_MAJOR = ['I','ii','iii','IV','V','vi','vii°'];
+const DEGREE_LABELS_MINOR = ['i','ii°','III','iv','v','VI','VII'];
+const DEGREE_LABELS_HARM_MINOR = ['i','ii°','III+','iv','V','VI','vii°'];
+const STRING_GROUPS = [
+    {label:'E-B-G',indices:[0,1,2]},{label:'B-G-D',indices:[1,2,3]},
+    {label:'G-D-A',indices:[2,3,4]},{label:'D-A-E',indices:[3,4,5]}
+];
+
+const CHORD_TYPES = {
+    'maj':    {semi:[0,4,7],       formula:'1-3-5',         cat:'Triads',  suffix:'',      fullName:'Major'},
+    'min':    {semi:[0,3,7],       formula:'1-♭3-5',        cat:'Triads',  suffix:'m',     fullName:'Minor'},
+    'dim':    {semi:[0,3,6],       formula:'1-♭3-♭5',       cat:'Triads',  suffix:'dim',   fullName:'Diminished'},
+    'aug':    {semi:[0,4,8],       formula:'1-3-♯5',        cat:'Triads',  suffix:'aug',   fullName:'Augmented'},
+    'sus2':   {semi:[0,2,7],       formula:'1-2-5',         cat:'Sus',     suffix:'sus2',  fullName:'Suspended 2nd'},
+    'sus4':   {semi:[0,5,7],       formula:'1-4-5',         cat:'Sus',     suffix:'sus4',  fullName:'Suspended 4th'},
+    'add9':   {semi:[0,2,4,7],     formula:'1-3-5-9',       cat:'Add',     suffix:'add9',  fullName:'Add 9'},
+    'madd9':  {semi:[0,2,3,7],     formula:'1-♭3-5-9',      cat:'Add',     suffix:'m(add9)', fullName:'Minor Add 9'},
+    '6':      {semi:[0,4,7,9],     formula:'1-3-5-6',       cat:'Add',     suffix:'6',     fullName:'Major 6th'},
+    'm6':     {semi:[0,3,7,9],     formula:'1-♭3-5-6',      cat:'Add',     suffix:'m6',    fullName:'Minor 6th'},
+    'maj7':   {semi:[0,4,7,11],    formula:'1-3-5-7',       cat:'7th',     suffix:'maj7',  fullName:'Major 7th'},
+    'm7':     {semi:[0,3,7,10],    formula:'1-♭3-5-♭7',     cat:'7th',     suffix:'m7',    fullName:'Minor 7th'},
+    '7':      {semi:[0,4,7,10],    formula:'1-3-5-♭7',      cat:'7th',     suffix:'7',     fullName:'Dominant 7th'},
+    'm7b5':   {semi:[0,3,6,10],    formula:'1-♭3-♭5-♭7',    cat:'7th',     suffix:'m7♭5',  fullName:'Half-Diminished'},
+    'dim7':   {semi:[0,3,6,9],     formula:'1-♭3-♭5-𝄫7',    cat:'7th',     suffix:'dim7',  fullName:'Diminished 7th'},
+    'mMaj7':  {semi:[0,3,7,11],    formula:'1-♭3-5-7',      cat:'7th',     suffix:'m(maj7)', fullName:'Minor Major 7th'},
+    'maj9':   {semi:[0,2,4,7,11],  formula:'1-3-5-7-9',     cat:'9th',     suffix:'maj9',  fullName:'Major 9th'},
+    'm9':     {semi:[0,2,3,7,10],  formula:'1-♭3-5-♭7-9',   cat:'9th',     suffix:'m9',    fullName:'Minor 9th'},
+    '9':      {semi:[0,2,4,7,10],  formula:'1-3-5-♭7-9',    cat:'9th',     suffix:'9',     fullName:'Dominant 9th'},
+    'maj11':  {semi:[0,2,4,5,7,11],formula:'1-3-5-7-9-11',  cat:'11th',    suffix:'maj11', fullName:'Major 11th'},
+    'm11':    {semi:[0,2,3,5,7,10],formula:'1-♭3-5-♭7-9-11',cat:'11th',    suffix:'m11',   fullName:'Minor 11th'},
+    '11':     {semi:[0,2,4,5,7,10],formula:'1-3-5-♭7-9-11', cat:'11th',    suffix:'11',    fullName:'Dominant 11th'},
+    'maj13':  {semi:[0,2,4,7,9,11],formula:'1-3-5-7-9-13',  cat:'13th',    suffix:'maj13', fullName:'Major 13th'},
+    'm13':    {semi:[0,2,3,7,9,10],formula:'1-♭3-5-♭7-9-13',cat:'13th',    suffix:'m13',   fullName:'Minor 13th'},
+    '13':     {semi:[0,2,4,7,9,10],formula:'1-3-5-♭7-9-13', cat:'13th',    suffix:'13',    fullName:'Dominant 13th'},
+};
+
+const VOICING_RULES = {
+    'maj':   {ess:[0,4,7],opt:[]}, 'min':  {ess:[0,3,7],opt:[]}, 'dim':  {ess:[0,3,6],opt:[]}, 'aug':  {ess:[0,4,8],opt:[]},
+    'sus2':  {ess:[0,2,7],opt:[]}, 'sus4': {ess:[0,5,7],opt:[]},
+    'add9':  {ess:[0,4,7],opt:[2]}, 'madd9':{ess:[0,3,7],opt:[2]},
+    '6':     {ess:[0,4,9],opt:[7]}, 'm6':  {ess:[0,3,9],opt:[7]},
+    'maj7':  {ess:[0,4,11],opt:[7]}, 'm7': {ess:[0,3,10],opt:[7]}, '7': {ess:[0,4,10],opt:[7]},
+    'm7b5':  {ess:[0,3,6,10],opt:[]}, 'dim7':{ess:[0,3,6,9],opt:[]}, 'mMaj7':{ess:[0,3,11],opt:[7]},
+    'maj9':  {ess:[0,2,4,11],opt:[7]}, 'm9': {ess:[0,2,3,10],opt:[7]}, '9': {ess:[0,2,4,10],opt:[7]},
+    'maj11': {ess:[0,5,11],opt:[2,4,7]}, 'm11':{ess:[0,3,5,10],opt:[2,7]}, '11':{ess:[0,5,10],opt:[2,4,7]},
+    'maj13': {ess:[0,4,9,11],opt:[2,7]}, 'm13':{ess:[0,3,9,10],opt:[2,7]}, '13':{ess:[0,4,9,10],opt:[2,7]},
+};
+
+const CHORD_ID_LIST = [
+    {intervals:[0,2,4,7,9,11], suffix:'maj13', name:'Major 13th', formula:'1-3-5-7-9-13'},
+    {intervals:[0,2,3,7,9,10], suffix:'m13',   name:'Minor 13th', formula:'1-♭3-5-♭7-9-13'},
+    {intervals:[0,2,4,7,9,10], suffix:'13',    name:'Dom 13th',   formula:'1-3-5-♭7-9-13'},
+    {intervals:[0,2,4,5,7,11], suffix:'maj11', name:'Major 11th', formula:'1-3-5-7-9-11'},
+    {intervals:[0,2,3,5,7,10], suffix:'m11',   name:'Minor 11th', formula:'1-♭3-5-♭7-9-11'},
+    {intervals:[0,2,4,5,7,10], suffix:'11',    name:'Dom 11th',   formula:'1-3-5-♭7-9-11'},
+    {intervals:[0,2,4,7,11],   suffix:'maj9',  name:'Major 9th',  formula:'1-3-5-7-9'},
+    {intervals:[0,2,3,7,10],   suffix:'m9',    name:'Minor 9th',  formula:'1-♭3-5-♭7-9'},
+    {intervals:[0,2,4,7,10],   suffix:'9',     name:'Dom 9th',    formula:'1-3-5-♭7-9'},
+    {intervals:[0,4,7,11],     suffix:'maj7',  name:'Major 7th',  formula:'1-3-5-7'},
+    {intervals:[0,3,7,10],     suffix:'m7',    name:'Minor 7th',  formula:'1-♭3-5-♭7'},
+    {intervals:[0,4,7,10],     suffix:'7',     name:'Dom 7th',    formula:'1-3-5-♭7'},
+    {intervals:[0,3,6,10],     suffix:'m7b5',  name:'Half-Dim',   formula:'1-♭3-♭5-♭7'},
+    {intervals:[0,3,6,9],      suffix:'dim7',  name:'Dim 7th',    formula:'1-♭3-♭5-𝄫7'},
+    {intervals:[0,3,7,11],     suffix:'m(maj7)', name:'Min Maj 7th', formula:'1-♭3-5-7'},
+    {intervals:[0,2,4,7],      suffix:'add9',  name:'Add 9',      formula:'1-3-5-9'},
+    {intervals:[0,2,3,7],      suffix:'m(add9)', name:'Min Add 9', formula:'1-♭3-5-9'},
+    {intervals:[0,4,7,9],      suffix:'6',     name:'Major 6th',  formula:'1-3-5-6'},
+    {intervals:[0,3,7,9],      suffix:'m6',    name:'Minor 6th',  formula:'1-♭3-5-6'},
+    {intervals:[0,4,7],        suffix:'',      name:'Major',      formula:'1-3-5'},
+    {intervals:[0,3,7],        suffix:'m',     name:'Minor',      formula:'1-♭3-5'},
+    {intervals:[0,3,6],        suffix:'dim',   name:'Diminished', formula:'1-♭3-♭5'},
+    {intervals:[0,4,8],        suffix:'aug',   name:'Augmented',  formula:'1-3-♯5'},
+    {intervals:[0,2,7],        suffix:'sus2',  name:'Sus 2',      formula:'1-2-5'},
+    {intervals:[0,5,7],        suffix:'sus4',  name:'Sus 4',      formula:'1-4-5'},
+    {intervals:[0,7],          suffix:'5',     name:'Power Chord', formula:'1-5'},
+];
+
+const INTERVAL_NAMES = {0:'R',1:'b2',2:'2',3:'b3',4:'3',5:'4',6:'b5',7:'5',8:'#5',9:'6',10:'b7',11:'7'};
+
+// =====================================================================
+// STATE
+// =====================================================================
+let state = {
+    root:'E', scaleType:'minorPentatonic', displayMode:'primary',
+    showRelative:false, showNotes:true, showIntervals:true,
+    harmKey:'E', harmScaleType:'naturalMinor', harmInversion:0, harmStringGroup:0,
+    clMode:'library',
+    clSelectedChord:null,
+    reverseNotes:[null,null,null,null,null,null],
+    // Audio
+    audioReady:false,
+    // Mic
+    micActive:false,
+    // Practice
+    practiceActive:false, practiceType:'scale', practiceBPM:80, practiceTempoMode:'free',
+    practiceIdx:0, practiceHits:0, practiceMisses:0, practiceStreak:0,
+    practiceLoop:false, practiceStartAsc:true, // true = start ascending, false = start descending
+    practiceScaleNotes:[], // [{note, midi, stringIdx, fret, positionIdx, ascending}]
+    practicePositions:[], // computed positions for display
+};
+
+// =====================================================================
+// AUDIO ENGINE (Tone.js)
+// =====================================================================
+let sampler = null;
+let metronome = null;
+let metronomePart = null;
+let samplerReady = false;
+
+function midiToFreq(midi){ return 440 * Math.pow(2, (midi - 69) / 12); }
+function midiToNoteName(midi){
+    const n = NOTES[((midi % 12) + 12) % 12];
+    const oct = Math.floor(midi / 12) - 1;
+    return n + oct;
+}
+// Convert MIDI note to Tone.js note string (e.g. 40 -> "E2")
+function midiToToneNote(midi){
+    const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[midi % 12] + (Math.floor(midi / 12) - 1);
+}
+
+function ensureAudio(){
+    if(state.audioReady && samplerReady) return Promise.resolve();
+    return Tone.start().then(function(){
+        return new Promise(function(resolve){
+            sampler = new Tone.Sampler({
+                urls: {
+                    "A1": "A1.mp3", "A2": "A2.mp3", "A3": "A3.mp3", "A4": "A4.mp3",
+                    "C2": "C2.mp3", "C3": "C3.mp3", "C4": "C4.mp3", "C5": "C5.mp3",
+                    "E2": "E2.mp3", "E3": "E3.mp3", "E4": "E4.mp3",
+                    "G2": "G2.mp3", "G3": "G3.mp3", "G4": "G4.mp3",
+                },
+                baseUrl: "https://tonejs.github.io/audio/salamander/",
+                release: 1.5,
+                onload: function(){
+                    samplerReady = true;
+                    resolve();
+                },
+                onerror: function(){
+                    // Fallback to synth if samples fail to load
+                    console.warn('Sampler failed to load, using synth fallback');
+                    sampler = new Tone.PolySynth(Tone.Synth, {
+                        maxPolyphony: 6,
+                        options: {
+                            oscillator: { type: 'triangle' },
+                            envelope: { attack: 0.005, decay: 0.4, sustain: 0.1, release: 1.0 },
+                            volume: -6
+                        }
+                    }).toDestination();
+                    samplerReady = true;
+                    resolve();
+                }
+            }).toDestination();
+            metronome = new Tone.MembraneSynth({
+                pitchDecay: 0.01, octaves: 4, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 },
+                volume: -10
+            }).toDestination();
+            state.audioReady = true;
+        });
+    });
+}
+
+function playMidiNote(midi, duration){
+    ensureAudio().then(function(){
+        const note = midiToToneNote(midi);
+        const now = Tone.now();
+        sampler.triggerAttackRelease(note, duration || 1.0, now);
+    });
+}
+
+function playMidiChord(midiArr, strum){
+    ensureAudio().then(function(){
+        const now = Tone.now();
+        const delay = strum ? 0.03 : 0;
+        var sorted = [...midiArr].sort(function(a,b){ return a - b; });
+        sorted.forEach(function(midi, i){
+            var note = midiToToneNote(midi);
+            sampler.triggerAttackRelease(note, 1.5, now + i * delay);
+        });
+    });
+}
+
+// Melodic: each note rings fully before the next, 1 second apart
+function playMidiSequence(midiArr, interval){
+    ensureAudio().then(function(){
+        var now = Tone.now();
+        var gap = interval || 1.0; // 1 second per note for natural guitar sustain
+        midiArr.forEach(function(midi, i){
+            var note = midiToToneNote(midi);
+            sampler.triggerAttackRelease(note, gap * 0.9, now + i * gap);
+        });
+    });
+}
+
+function playMetronomeTick(){
+    if(metronome){
+        metronome.triggerAttackRelease('C2', '32n');
+    }
+}
+
+// Get MIDI note for a string index and fret
+function getMidi(stringIdx, fret){ return STRINGS[stringIdx].midi + fret; }
+
+// Play a single note by string/fret click
+window.playNoteAt = function(stringIdx, fret){
+    playMidiNote(getMidi(stringIdx, fret));
+};
+
+// Play current scale ascending
+window.playCurrentScale = function(){
+    const def = SCALE_DEFS[state.scaleType];
+    const rootIdx = ni(state.root);
+    // Build scale notes across strings, ascending from low E
+    const midiNotes = [];
+    for(let s = 5; s >= 0; s--){
+        const openMidi = STRINGS[s].midi;
+        for(let f = 0; f <= NUM_FRETS; f++){
+            const m = openMidi + f;
+            const noteIdx = ((m % 12) + 12) % 12;
+            const fromRoot = ((noteIdx - rootIdx) % 12 + 12) % 12;
+            if(def.semitones.includes(fromRoot)){
+                midiNotes.push(m);
+            }
+        }
+    }
+    // Remove duplicates and sort
+    const unique = [...new Set(midiNotes)].sort((a,b) => a - b);
+    playMidiSequence(unique, 1.0); // 1 second apart — melodic, each note rings out
+};
+
+// Play a chord voicing from frets array
+window.playVoicing = function(fretsStr){
+    const frets = fretsStr.split(',').map(Number);
+    const midiArr = [];
+    frets.forEach(function(f, s){
+        if(f >= 0) midiArr.push(getMidi(s, f));
+    });
+    playMidiChord(midiArr, true);
+};
+
+// Play harmonized chord by chord index
+window.playHarmChord = function(chordIdx){
+    const td = getTriadsForScale(state.harmKey, state.harmScaleType);
+    if(!td) return;
+    const ch = td.triads[chordIdx];
+    if(!ch) return;
+    const rootIdx = ni(ch.root);
+    // Build simple voicing from chord notes
+    const midiArr = ch.notes.map(function(n, i){
+        return rootIdx + TRIAD_INTERVALS[ch.quality][i] + 48; // octave 3
+    });
+    playMidiChord(midiArr, true);
+};
+
+// =====================================================================
+// PITCH DETECTION (Autocorrelation via Web Audio API)
+// =====================================================================
+let audioCtx = null;
+let micStream = null;
+let analyserNode = null;
+let micDetectionInterval = null;
+const MIC_SAMPLE_RATE = 44100;
+const MIC_FFT_SIZE = 2048;
+const CENTS_TOLERANCE = 15; // cents
+
+function hzToMidi(hz){ return 69 + 12 * Math.log2(hz / 440); }
+function midiToHz(midi){ return 440 * Math.pow(2, (midi - 69) / 12); }
+
+function detectPitch(buf, sampleRate){
+    // Autocorrelation-based pitch detection
+    const SIZE = buf.length;
+    let rms = 0;
+    for(let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+    rms = Math.sqrt(rms / SIZE);
+    if(rms < 0.01) return null; // too quiet
+
+    // Autocorrelation
+    const corr = new Float32Array(SIZE);
+    for(let lag = 0; lag < SIZE; lag++){
+        let sum = 0;
+        for(let i = 0; i < SIZE - lag; i++){
+            sum += buf[i] * buf[i + lag];
+        }
+        corr[lag] = sum;
+    }
+
+    // Find first dip then first peak after it
+    let d = 0;
+    while(d < SIZE / 2 && corr[d] > corr[d+1]) d++;
+    let maxVal = -1, maxPos = -1;
+    const minLag = Math.floor(sampleRate / 1200); // max ~1200Hz
+    const maxLag = Math.floor(sampleRate / 60);   // min ~60Hz (low E is ~82Hz)
+    for(let i = Math.max(d, minLag); i < Math.min(SIZE / 2, maxLag); i++){
+        if(corr[i] > maxVal){ maxVal = corr[i]; maxPos = i; }
+    }
+
+    if(maxPos === -1 || maxVal < 0.01) return null;
+
+    // Parabolic interpolation for sub-sample accuracy
+    let shift = 0;
+    if(maxPos > 0 && maxPos < SIZE - 1){
+        const a = corr[maxPos - 1];
+        const b = corr[maxPos];
+        const c = corr[maxPos + 1];
+        shift = (a - c) / (2 * (a - 2 * b + c));
+        if(Math.abs(shift) > 1) shift = 0;
+    }
+
+    return sampleRate / (maxPos + shift);
+}
+
+function startMicDetection(){
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream){
+        micStream = stream;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: MIC_SAMPLE_RATE });
+        const source = audioCtx.createMediaStreamSource(stream);
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = MIC_FFT_SIZE;
+        source.connect(analyserNode);
+
+        const buf = new Float32Array(MIC_FFT_SIZE);
+
+        micDetectionInterval = setInterval(function(){
+            analyserNode.getFloatTimeDomainData(buf);
+            const hz = detectPitch(buf, audioCtx.sampleRate);
+            updateMicHUD(hz);
+            if(state.practiceActive && hz){
+                handlePracticeDetection(hz);
+            }
+        }, 33); // ~30fps
+
+        document.getElementById('micHud').style.display = 'block';
+    }).catch(function(err){
+        console.warn('Mic access denied:', err);
+        state.micActive = false;
+        document.getElementById('micToggle').classList.remove('active');
+        document.getElementById('micToggle').textContent = 'Mic Off';
+    });
+}
+
+function stopMicDetection(){
+    if(micDetectionInterval){ clearInterval(micDetectionInterval); micDetectionInterval = null; }
+    if(micStream){ micStream.getTracks().forEach(function(t){ t.stop(); }); micStream = null; }
+    if(audioCtx){ audioCtx.close(); audioCtx = null; }
+    document.getElementById('micHud').style.display = 'none';
+    document.getElementById('micNote').textContent = '—';
+    document.getElementById('micFreq').textContent = 'Listening...';
+    document.getElementById('micMatch').textContent = '';
+}
+
+function updateMicHUD(hz){
+    const noteEl = document.getElementById('micNote');
+    const freqEl = document.getElementById('micFreq');
+    const matchEl = document.getElementById('micMatch');
+
+    if(!hz || hz < 60 || hz > 1400){
+        noteEl.textContent = '—';
+        freqEl.textContent = 'Listening...';
+        matchEl.textContent = '';
+        matchEl.className = 'mic-hud-match';
+        return;
+    }
+
+    const midi = hzToMidi(hz);
+    const roundedMidi = Math.round(midi);
+    const cents = Math.round((midi - roundedMidi) * 100);
+    const noteName = midiToNoteName(roundedMidi);
+
+    noteEl.textContent = noteName;
+    freqEl.textContent = hz.toFixed(1) + ' Hz  (' + (cents >= 0 ? '+' : '') + cents + ' cents)';
+
+    if(state.practiceActive){
+        const target = getCurrentPracticeTarget();
+        if(target){
+            const diff = Math.abs(midi - target.midi);
+            if(diff * 100 <= CENTS_TOLERANCE){
+                matchEl.textContent = 'Target: ' + midiToNoteName(target.midi) + ' — HIT!';
+                matchEl.className = 'mic-hud-match hit';
+            } else {
+                matchEl.textContent = 'Target: ' + midiToNoteName(target.midi);
+                matchEl.className = 'mic-hud-match miss';
+            }
+        }
+    } else {
+        matchEl.textContent = '';
+        matchEl.className = 'mic-hud-match';
+    }
+}
+
+window.toggleMic = function(){
+    state.micActive = !state.micActive;
+    const btn = document.getElementById('micToggle');
+    if(state.micActive){
+        btn.classList.add('active');
+        btn.textContent = 'Mic On';
+        ensureAudio().then(function(){ startMicDetection(); });
+    } else {
+        btn.classList.remove('active');
+        btn.textContent = 'Mic Off';
+        stopMicDetection();
+        if(state.practiceActive) togglePractice(); // stop practice if mic off
+    }
+};
+
+// =====================================================================
+// PRACTICE MODE
+// =====================================================================
+window.togglePractice = function(){
+    state.practiceActive = !state.practiceActive;
+    const btn = document.getElementById('practiceToggle');
+    const panel = document.getElementById('practicePanel');
+    if(state.practiceActive){
+        if(!state.micActive) toggleMic();
+        btn.classList.add('active');
+        btn.textContent = 'Stop Practice';
+        panel.style.display = 'block';
+        startPractice();
+    } else {
+        btn.classList.remove('active');
+        btn.textContent = 'Practice';
+        panel.style.display = 'none';
+        stopPractice();
+    }
+};
+
+// =====================================================================
+// SCALE POSITIONS — Pillar Up/Down Pattern
+// =====================================================================
+// Build positions for any scale. Each position = array of 6 sub-arrays
+// (low E → high e), each with 2-3 notes sorted ascending by fret.
+function buildScalePositions(root, scaleType){
+    var def = SCALE_DEFS[scaleType];
+    var rootIdx = ni(root);
+    var maxPerStr = def.semitones.length <= 6 ? 2 : 3; // pent/blues = 2, 7-note = 3
+
+    // All scale notes on each string (index 0 = high e, ..., 5 = low E)
+    var strNotes = [];
+    for(var s = 0; s < 6; s++){
+        var openIdx = ni(STRINGS[s].name);
+        var openMidi = STRINGS[s].midi;
+        var notes = [];
+        for(var f = 0; f <= NUM_FRETS; f++){
+            var noteIdx = ((openIdx + f) % 12 + 12) % 12;
+            var fromRoot = ((noteIdx - rootIdx) % 12 + 12) % 12;
+            if(def.semitones.includes(fromRoot)){
+                notes.push({ fret:f, note:NOTES[noteIdx], midi:openMidi+f, stringIdx:s });
+            }
+        }
+        strNotes.push(notes);
+    }
+
+    // Position anchors = each scale note on low E (string 5) up to fret 12
+    var anchors = strNotes[5].filter(function(n){ return n.fret <= 12; });
+    if(anchors.length === 0) return [];
+
+    var positions = [];
+    for(var ai = 0; ai < anchors.length; ai++){
+        var af = anchors[ai].fret;
+        var nextAf = ai + 1 < anchors.length ? anchors[ai+1].fret : af + 5;
+        var span = Math.max(nextAf - af, 3);
+        var wLow = Math.max(0, af - 1);
+        var wHigh = af + span + 1;
+
+        var posStrings = []; // [lowE notes, A notes, D notes, G notes, B notes, highE notes]
+        for(var s = 5; s >= 0; s--){
+            var inWindow = strNotes[s].filter(function(n){
+                return n.fret >= wLow && n.fret <= wHigh;
+            });
+            // Trim to maxPerStr, keeping the ones closest to anchor
+            if(inWindow.length > maxPerStr){
+                inWindow = inWindow.slice(0, maxPerStr);
+            }
+            posStrings.push(inWindow);
+        }
+        positions.push({ strings: posStrings, startFret: af });
+    }
+    return positions;
+}
+
+// Build the full pillar practice sequence: pos1 ↑, pos2 ↓, pos3 ↑, ...
+function buildPillarPracticeSequence(root, scaleType, startAscending){
+    var positions = buildScalePositions(root, scaleType);
+    if(positions.length === 0) return { sequence:[], positions:positions };
+
+    var sequence = [];
+    for(var pi = 0; pi < positions.length; pi++){
+        var pos = positions[pi];
+        var ascending = startAscending ? (pi % 2 === 0) : (pi % 2 === 1);
+
+        if(ascending){
+            // Low string → high string, notes ascending per string
+            for(var si = 0; si < pos.strings.length; si++){
+                var sNotes = pos.strings[si];
+                for(var ni2 = 0; ni2 < sNotes.length; ni2++){
+                    var n = sNotes[ni2];
+                    sequence.push({ note:n.note, midi:n.midi, stringIdx:n.stringIdx,
+                        fret:n.fret, positionIdx:pi, ascending:true });
+                }
+            }
+        } else {
+            // High string → low string, notes descending per string
+            for(var si = pos.strings.length - 1; si >= 0; si--){
+                var sNotes = pos.strings[si];
+                for(var ni2 = sNotes.length - 1; ni2 >= 0; ni2--){
+                    var n = sNotes[ni2];
+                    sequence.push({ note:n.note, midi:n.midi, stringIdx:n.stringIdx,
+                        fret:n.fret, positionIdx:pi, ascending:false });
+                }
+            }
+        }
+    }
+    return { sequence:sequence, positions:positions };
+}
+
+// Legacy fallback (used nowhere now, but kept for safety)
+function buildScalePracticeNotes(){
+    var result = buildPillarPracticeSequence(state.root, state.scaleType, state.practiceStartAsc);
+    state.practicePositions = result.positions;
+    return result.sequence;
+}
+
+function buildChordPracticeSequence(){
+    const td = getTriadsForScale(state.harmKey, state.harmScaleType);
+    if(!td) return [];
+    return td.triads.map(function(ch, i){
+        const rootIdx = ni(ch.root);
+        const midiArr = ch.notes.map(function(n, j){
+            return rootIdx + TRIAD_INTERVALS[ch.quality][j] + 48;
+        });
+        return { label: ch.label, degree: ch.degree, midiArr: midiArr, notes: ch.notes, chordIdx: i };
+    });
+}
+
+function startPractice(){
+    state.practiceIdx = 0;
+    state.practiceHits = 0;
+    state.practiceMisses = 0;
+    state.practiceStreak = 0;
+
+    if(state.practiceType === 'scale'){
+        var result = buildPillarPracticeSequence(state.root, state.scaleType, state.practiceStartAsc);
+        state.practiceScaleNotes = result.sequence;
+        state.practicePositions = result.positions;
+    } else {
+        state.practiceChordSeq = buildChordPracticeSequence();
+    }
+
+    renderPracticePanel();
+    renderFretboard();
+}
+
+function stopPractice(){
+    state.practiceScaleNotes = [];
+    state.practicePositions = [];
+    state.practiceChordSeq = [];
+    if(metronomePart){ metronomePart.stop(); metronomePart.dispose(); metronomePart = null; }
+    renderFretboard();
+}
+
+function getCurrentPracticeTarget(){
+    if(!state.practiceActive) return null;
+    if(state.practiceType === 'scale'){
+        const notes = state.practiceScaleNotes;
+        if(!notes || state.practiceIdx >= notes.length) return null;
+        return notes[state.practiceIdx];
+    } else {
+        const seq = state.practiceChordSeq;
+        if(!seq || state.practiceIdx >= seq.length) return null;
+        const ch = seq[state.practiceIdx];
+        // Include note names (pitch classes) for full-neck highlighting
+        const chordNoteNames = ch.notes; // e.g. ['B','D','F'] for Bdim
+        return { midi: ch.midiArr[0], midiArr: ch.midiArr, label: ch.label,
+                 notes: ch.notes, chordIdx: ch.chordIdx, degree: ch.degree,
+                 chordNoteNames: chordNoteNames };
+    }
+}
+
+// Get the pitch classes for the current chord practice target (for full-neck highlight)
+function getPracticeChordPitchClasses(){
+    if(!state.practiceActive || state.practiceType !== 'chord') return null;
+    const target = getCurrentPracticeTarget();
+    if(!target || !target.chordNoteNames) return null;
+    return new Set(target.chordNoteNames);
+}
+
+let lastHitTime = 0;
+function handlePracticeDetection(hz){
+    if(!state.practiceActive) return;
+    const midi = hzToMidi(hz);
+    const now = Date.now();
+    if(now - lastHitTime < 300) return; // debounce
+
+    if(state.practiceType === 'scale'){
+        const notes = state.practiceScaleNotes;
+        if(!notes || state.practiceIdx >= notes.length) return;
+        const target = notes[state.practiceIdx];
+        const diff = Math.abs(midi - target.midi);
+        if(diff * 100 <= CENTS_TOLERANCE){
+            // HIT
+            lastHitTime = now;
+            state.practiceHits++;
+            state.practiceStreak++;
+            flashPracticeNote(target.stringIdx, target.fret, 'hit');
+            state.practiceIdx++;
+            if(state.practiceIdx >= notes.length){
+                if(state.practiceLoop){
+                    // Rebuild the sequence from scratch (positions stay the same)
+                    state.practiceIdx = 0;
+                    var result = buildPillarPracticeSequence(state.root, state.scaleType, state.practiceStartAsc);
+                    state.practiceScaleNotes = result.sequence;
+                    state.practicePositions = result.positions;
+                }
+            }
+            renderPracticePanel();
+            renderFretboard();
+        }
+    } else {
+        // Chord practice - check if ANY of the chord tones match
+        const seq = state.practiceChordSeq;
+        if(!seq || state.practiceIdx >= seq.length) return;
+        const target = seq[state.practiceIdx];
+        // Check if detected note is one of the chord tones (any octave)
+        const detectedPitch = ((Math.round(midi) % 12) + 12) % 12;
+        const chordPitches = target.midiArr.map(function(m){ return ((m % 12) + 12) % 12; });
+        if(chordPitches.includes(detectedPitch)){
+            if(!target._detected) target._detected = new Set();
+            target._detected.add(detectedPitch);
+            if(target._detected.size >= chordPitches.length){
+                // All chord tones detected!
+                lastHitTime = now;
+                state.practiceHits++;
+                state.practiceStreak++;
+                state.practiceIdx++;
+                renderPracticePanel();
+                renderFretboard();
+            }
+        }
+    }
+}
+
+window.skipPracticeNote = function(){
+    if(!state.practiceActive) return;
+    state.practiceMisses++;
+    state.practiceStreak = 0;
+    state.practiceIdx++;
+    const total = state.practiceType === 'scale' ? state.practiceScaleNotes.length :
+                  (state.practiceChordSeq ? state.practiceChordSeq.length : 0);
+    if(state.practiceIdx >= total && state.practiceLoop){
+        state.practiceIdx = 0;
+    }
+    renderPracticePanel();
+    renderFretboard();
+};
+
+window.setPracticeType = function(t){
+    state.practiceType = t;
+    startPractice();
+};
+
+window.setPracticeBPM = function(v){
+    state.practiceBPM = parseInt(v);
+    document.getElementById('bpmLabel').textContent = v + ' BPM';
+    if(state.practiceTempoMode === 'guided') startMetronome();
+};
+
+window.setPracticeTempoMode = function(m){
+    state.practiceTempoMode = m;
+    if(m === 'guided') startMetronome();
+    else stopMetronome();
+};
+
+window.setPracticeLoop = function(el){
+    state.practiceLoop = el.checked;
+};
+
+window.setPracticeStartDir = function(asc){
+    state.practiceStartAsc = asc;
+    if(state.practiceActive && state.practiceType === 'scale') startPractice();
+};
+
+function startMetronome(){
+    stopMetronome();
+    ensureAudio().then(function(){
+        Tone.Transport.bpm.value = state.practiceBPM;
+        metronomePart = new Tone.Loop(function(time){
+            metronome.triggerAttackRelease('C2', '32n', time);
+        }, '4n');
+        Tone.Transport.start();
+        metronomePart.start(0);
+    });
+}
+
+function stopMetronome(){
+    if(metronomePart){ metronomePart.stop(); metronomePart.dispose(); metronomePart = null; }
+    Tone.Transport.stop();
+}
+
+function flashPracticeNote(stringIdx, fret, type){
+    const noteId = 'fb-note-' + stringIdx + '-' + fret;
+    const el = document.getElementById(noteId);
+    if(el){
+        el.classList.add('practice-' + type);
+        setTimeout(function(){ el.classList.remove('practice-' + type); }, 400);
+    }
+}
+
+function renderPracticePanel(){
+    const panel = document.getElementById('practicePanel');
+    if(!state.practiceActive){ panel.style.display = 'none'; return; }
+
+    let total, progress;
+    if(state.practiceType === 'scale'){
+        total = state.practiceScaleNotes.length;
+        progress = state.practiceIdx;
+    } else {
+        total = state.practiceChordSeq ? state.practiceChordSeq.length : 0;
+        progress = state.practiceIdx;
+    }
+
+    const accuracy = (state.practiceHits + state.practiceMisses) > 0 ?
+        Math.round(state.practiceHits / (state.practiceHits + state.practiceMisses) * 100) : 100;
+
+    const target = getCurrentPracticeTarget();
+    let targetLabel = '—';
+    let nextLabel = '';
+    let posLabel = '';
+    if(target){
+        if(state.practiceType === 'scale'){
+            targetLabel = midiToNoteName(target.midi);
+            // Position info
+            if(target.positionIdx !== undefined){
+                var dir = target.ascending ? '\u2191' : '\u2193'; // ↑ or ↓
+                posLabel = 'Pos ' + (target.positionIdx + 1) + ' ' + dir;
+            }
+        } else {
+            targetLabel = target.label;
+        }
+    }
+    // Next target
+    if(state.practiceType === 'chord' && state.practiceChordSeq && state.practiceIdx + 1 < state.practiceChordSeq.length){
+        nextLabel = 'Up next: ' + state.practiceChordSeq[state.practiceIdx + 1].label;
+    } else if(state.practiceType === 'scale' && state.practiceScaleNotes && state.practiceIdx + 1 < state.practiceScaleNotes.length){
+        var nextNote = state.practiceScaleNotes[state.practiceIdx + 1];
+        nextLabel = 'Next: ' + midiToNoteName(nextNote.midi);
+        // Show if next position changes
+        if(target && nextNote.positionIdx !== target.positionIdx){
+            var nd = nextNote.ascending ? '\u2191' : '\u2193';
+            nextLabel += ' (Pos ' + (nextNote.positionIdx + 1) + ' ' + nd + ')';
+        }
+    }
+
+    let h = '<div class="practice-panel">';
+    h += '<div class="practice-panel-title">Practice Mode</div>';
+    h += '<div class="practice-controls">';
+    h += '<select onchange="setPracticeType(this.value)">';
+    h += '<option value="scale"' + (state.practiceType === 'scale' ? ' selected' : '') + '>Scale Practice</option>';
+    h += '<option value="chord"' + (state.practiceType === 'chord' ? ' selected' : '') + '>Chord Practice</option>';
+    h += '</select>';
+    if(state.practiceType === 'scale'){
+        h += '<div class="btn-group">';
+        h += '<button class="toggle-btn' + (state.practiceStartAsc ? ' active' : '') + '" onclick="setPracticeStartDir(true)" style="font-size:11px;padding:6px 10px;" title="Start ascending">\u2191 Asc First</button>';
+        h += '<button class="toggle-btn' + (!state.practiceStartAsc ? ' active' : '') + '" onclick="setPracticeStartDir(false)" style="font-size:11px;padding:6px 10px;" title="Start descending">\u2193 Desc First</button>';
+        h += '</div>';
+    }
+    h += '<select onchange="setPracticeTempoMode(this.value)">';
+    h += '<option value="free"' + (state.practiceTempoMode === 'free' ? ' selected' : '') + '>Free Mode</option>';
+    h += '<option value="guided"' + (state.practiceTempoMode === 'guided' ? ' selected' : '') + '>Guided Tempo</option>';
+    h += '</select>';
+    h += '<input type="range" min="40" max="200" value="' + state.practiceBPM + '" oninput="setPracticeBPM(this.value)">';
+    h += '<span id="bpmLabel" style="font-size:12px;color:#aaa;min-width:55px;">' + state.practiceBPM + ' BPM</span>';
+    h += '<label style="font-size:12px;color:#aaa;display:flex;align-items:center;gap:4px;"><input type="checkbox"' + (state.practiceLoop ? ' checked' : '') + ' onchange="setPracticeLoop(this)"> Loop</label>';
+    h += '<button class="skip-btn" onclick="skipPracticeNote()">Skip &rarr;</button>';
+    h += '</div>';
+
+    h += '<div class="practice-status">';
+    h += '<div><div class="stat-label">Target</div><div class="stat-value">' + targetLabel + '</div></div>';
+    if(posLabel){
+        h += '<div><div class="stat-label">Position</div><div class="stat-value" style="font-size:13px;">' + posLabel;
+        if(state.practicePositions.length > 0){
+            h += ' <span style="color:#888;font-weight:400;">/ ' + state.practicePositions.length + '</span>';
+        }
+        h += '</div></div>';
+    }
+    h += '<div><div class="stat-label">Progress</div><div class="stat-value">' + Math.min(progress + 1, total) + ' / ' + total + '</div></div>';
+    h += '<div><div class="stat-label">Streak</div><div class="stat-value hit">' + state.practiceStreak + '</div></div>';
+    h += '<div><div class="stat-label">Accuracy</div><div class="stat-value">' + accuracy + '%</div></div>';
+    if(nextLabel) h += '<div style="color:#888;font-size:12px;margin-left:auto;">' + nextLabel + '</div>';
+    h += '</div>';
+
+    // Goal Voicing — show easiest chord diagram for current chord practice target
+    if(state.practiceType === 'chord' && target && target.chordNoteNames && progress < total){
+        var goalChordRoot = target.chordNoteNames[0]; // root of the chord
+        // Find the triad quality from the chord sequence
+        var goalTriadType = null;
+        if(state.practiceChordSeq && state.practiceChordSeq[state.practiceIdx]){
+            var seqItem = state.practiceChordSeq[state.practiceIdx];
+            // Look up the triad type from the harmonized scale data
+            var td = getTriadsForScale(state.harmKey, state.harmScaleType);
+            if(td && td.triads[seqItem.chordIdx]){
+                goalTriadType = td.triads[seqItem.chordIdx].quality;
+            }
+        }
+        if(goalTriadType){
+            var goalVoicings = findGuitarVoicings(goalChordRoot, goalTriadType, 8);
+            if(goalVoicings.length > 0){
+                // Rank by: fewest fretted notes (open strings preferred), lowest position, fewest fingers
+                var ranked = goalVoicings.slice().sort(function(a, b){
+                    var aOpen = a.frets.filter(function(f){ return f === 0; }).length;
+                    var bOpen = b.frets.filter(function(f){ return f === 0; }).length;
+                    if(bOpen !== aOpen) return bOpen - aOpen; // more open strings = easier
+                    var aFingers = a.frets.filter(function(f){ return f > 0; }).length;
+                    var bFingers = b.frets.filter(function(f){ return f > 0; }).length;
+                    if(aFingers !== bFingers) return aFingers - bFingers; // fewer fingers = easier
+                    return a.pos - b.pos; // lower position = easier
+                });
+                var easiest = ranked[0];
+                var ct = CHORD_TYPES[goalTriadType];
+                var goalNotes = ct ? ct.semi.map(function(s){ return noteAt(ni(goalChordRoot) + s); }) : target.chordNoteNames;
+                h += '<div style="margin-top:14px;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;">';
+                h += '<div>';
+                h += '<div style="font-size:11px;font-weight:700;color:#ffb703;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Goal Voicing</div>';
+                h += '<div style="font-size:10px;color:#aaa;margin-bottom:6px;">' + target.label + '</div>';
+                h += renderChordDiagram(easiest, goalChordRoot, goalNotes);
+                h += '</div>';
+                // Show a second option if available
+                if(ranked.length > 1){
+                    h += '<div>';
+                    h += '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Alt Voicing</div>';
+                    h += '<div style="font-size:10px;color:#666;margin-bottom:6px;">' + target.label + '</div>';
+                    h += renderChordDiagram(ranked[1], goalChordRoot, goalNotes);
+                    h += '</div>';
+                }
+                h += '</div>';
+            }
+        }
+    }
+
+    if(progress >= total && total > 0){
+        h += '<div style="margin-top:12px;text-align:center;padding:14px;background:rgba(6,214,160,0.1);border-radius:8px;border:1px solid rgba(6,214,160,0.3);">';
+        h += '<span style="font-size:18px;font-weight:700;color:#06d6a0;">Complete!</span>';
+        h += '<span style="font-size:13px;color:#aaa;margin-left:12px;">Hits: ' + state.practiceHits + ' | Misses: ' + state.practiceMisses + ' | Accuracy: ' + accuracy + '%</span>';
+        h += '</div>';
+    }
+
+    h += '</div>';
+    panel.innerHTML = h;
+}
+
+// =====================================================================
+// UTILITIES
+// =====================================================================
+function ni(n){return NOTES.indexOf(n)}
+function noteAt(idx){return NOTES[((idx%12)+12)%12]}
+function getScaleNotes(root,def){const r=ni(root);return def.semitones.map(function(s){return noteAt(r+s);})}
+function semi(root,note){return((ni(note)-ni(root))%12+12)%12}
+function getIntervalLabel(root,note,def){
+    const s=semi(root,note);const idx=def.semitones.indexOf(s);
+    if(idx>=0)return def.intervals[idx];
+    return INTERVAL_NAMES[s]||'?';
+}
+
+function getPairedScale(root,type){
+    if(type==='minorPentatonic'){const r=noteAt(ni(root)+3);return{root:r,type:'majorPentatonic',label:r+' Major Pentatonic'};}
+    if(type==='majorPentatonic'){const r=noteAt(ni(root)-3);return{root:r,type:'minorPentatonic',label:r+' Minor Pentatonic'};}
+    if(type==='naturalMinor'){const r=noteAt(ni(root)+3);return{root:r,type:'major',label:r+' Major'};}
+    if(type==='major'){const r=noteAt(ni(root)-3);return{root:r,type:'naturalMinor',label:r+' Natural Minor'};}
+    if(type==='blues'){const r=noteAt(ni(root)+3);return{root:r,type:'majorPentatonic',label:r+' Major Pentatonic'};}
+    return null;
+}
+function hasRelativeScale(t){return t!=='harmonicMinor';}
+
+function getNoteColor(note,primary,paired,pRoot,paRoot){
+    const inP=primary.includes(note),inPa=paired&&paired.includes(note);
+    if(state.displayMode==='primary'){if(!inP)return null;return note===pRoot?'clr-root':'clr-scale';}
+    if(state.displayMode==='paired'){if(!inPa)return null;return note===paRoot?'clr-rel-root':'clr-paired';}
+    if(!inP&&!inPa)return null;
+    if(note===pRoot)return'clr-root';if(note===paRoot)return'clr-rel-root';
+    if(inP&&inPa)return'clr-shared';return inP?'clr-scale':'clr-paired';
+}
+
+function syncHarmScaleType(){
+    const t=state.scaleType;
+    if(t==='minorPentatonic'||t==='blues'||t==='naturalMinor')state.harmScaleType='naturalMinor';
+    else if(t==='majorPentatonic'||t==='major')state.harmScaleType='major';
+    else state.harmScaleType=t;
+}
+
+// =====================================================================
+// DIATONIC CHORD LIBRARY ENGINE
+// =====================================================================
+function getParentScaleType(scaleType){
+    if(scaleType==='minorPentatonic'||scaleType==='blues')return'naturalMinor';
+    if(scaleType==='majorPentatonic')return'major';
+    return scaleType;
+}
+
+function getDiatonicChordsForKey(keyRoot, scaleType){
+    const parentType = getParentScaleType(scaleType);
+    const def = SCALE_DEFS[parentType];
+    if(!def||def.semitones.length<7) return null;
+    const scaleNotes = getScaleNotes(keyRoot, def);
+    var qualityPattern, degreeLabels;
+    if(parentType==='major'){qualityPattern=MAJOR_TRIAD_PATTERN;degreeLabels=DEGREE_LABELS_MAJOR;}
+    else if(parentType==='harmonicMinor'){qualityPattern=HARMONIC_MINOR_TRIAD_PATTERN;degreeLabels=DEGREE_LABELS_HARM_MINOR;}
+    else{qualityPattern=MINOR_TRIAD_PATTERN;degreeLabels=DEGREE_LABELS_MINOR;}
+
+    const degrees = [];
+    for(var d=0;d<7;d++){
+        const degRoot = scaleNotes[d];
+        const diaInt = [];
+        for(var i=0;i<7;i++){
+            const note = scaleNotes[(d+i)%7];
+            diaInt.push(semi(degRoot,note));
+        }
+        const third=diaInt[2], fifth=diaInt[4], seventh=diaInt[6];
+        const ninth=diaInt[1], eleventh=diaInt[3], thirteenth=diaInt[5];
+
+        const chords = [];
+        const triadQ = qualityPattern[d];
+        const triadSemi = TRIAD_INTERVALS[triadQ];
+        chords.push({type:triadQ, semi:triadSemi});
+
+        if(fifth===7){
+            chords.push({type:'sus2',semi:[0,ninth,7]});
+            chords.push({type:'sus4',semi:[0,eleventh,7]});
+        }
+        if(third===4 && fifth===7 && ninth===2) chords.push({type:'add9',semi:[0,2,4,7]});
+        if(third===3 && fifth===7 && ninth===2) chords.push({type:'madd9',semi:[0,2,3,7]});
+        if(third===4 && fifth===7 && thirteenth===9) chords.push({type:'6',semi:[0,4,7,9]});
+        if(third===3 && fifth===7 && thirteenth===9) chords.push({type:'m6',semi:[0,3,7,9]});
+        if(third===4 && fifth===7 && seventh===11) chords.push({type:'maj7',semi:[0,4,7,11]});
+        if(third===3 && fifth===7 && seventh===10) chords.push({type:'m7',semi:[0,3,7,10]});
+        if(third===4 && fifth===7 && seventh===10) chords.push({type:'7',semi:[0,4,7,10]});
+        if(third===3 && fifth===6 && seventh===10) chords.push({type:'m7b5',semi:[0,3,6,10]});
+        if(third===3 && fifth===6 && seventh===9)  chords.push({type:'dim7',semi:[0,3,6,9]});
+        if(third===3 && fifth===7 && seventh===11) chords.push({type:'mMaj7',semi:[0,3,7,11]});
+        if(ninth===2){
+            if(third===4 && seventh===11) chords.push({type:'maj9',semi:[0,2,4,7,11]});
+            if(third===3 && seventh===10 && fifth===7) chords.push({type:'m9',semi:[0,2,3,7,10]});
+            if(third===4 && seventh===10) chords.push({type:'9',semi:[0,2,4,7,10]});
+        }
+        if(ninth===2 && eleventh===5){
+            if(seventh===11) chords.push({type:'maj11',semi:[0,2,4,5,7,11]});
+            if(third===3 && seventh===10 && fifth===7) chords.push({type:'m11',semi:[0,2,3,5,7,10]});
+            if(third===4 && seventh===10) chords.push({type:'11',semi:[0,2,4,5,7,10]});
+        }
+        if(ninth===2 && thirteenth===9){
+            if(seventh===11 && third===4) chords.push({type:'maj13',semi:[0,2,4,7,9,11]});
+            if(seventh===10 && third===3 && fifth===7) chords.push({type:'m13',semi:[0,2,3,7,9,10]});
+            if(seventh===10 && third===4) chords.push({type:'13',semi:[0,2,4,7,9,10]});
+        }
+
+        degrees.push({
+            root: degRoot, degree: degreeLabels[d], degreeIndex: d,
+            triadQuality: triadQ, chords: chords
+        });
+    }
+    return {degrees: degrees, parentType: parentType, scaleNotes: scaleNotes};
+}
+
+// =====================================================================
+// VOICING GENERATOR
+// =====================================================================
+const voicingCache = {};
+
+function findGuitarVoicings(root, chordType, maxResults){
+    maxResults = maxResults || 8;
+    const cacheKey = root+'_'+chordType;
+    if(voicingCache[cacheKey]) return voicingCache[cacheKey];
+
+    const ct = CHORD_TYPES[chordType];
+    if(!ct) return [];
+    const rules = VOICING_RULES[chordType] || {ess:ct.semi,opt:[]};
+    const rootIdx = ni(root);
+    const allSemi = [...new Set([...rules.ess,...rules.opt])].sort(function(a,b){return a-b;});
+    const allNotesSet = new Set(allSemi.map(function(s){return noteAt(rootIdx+s);}));
+    const essNotesSet = new Set(rules.ess.map(function(s){return noteAt(rootIdx+s);}));
+    const rootNote = root;
+
+    const results = [];
+    const seen = new Set();
+
+    for(var winStart=0; winStart<=12; winStart++){
+        const winEnd = winStart + 4;
+        const opts = [];
+        for(var s=0;s<6;s++){
+            const openIdx = ni(STRINGS[s].name);
+            const avail = [{fret:-1,note:null}];
+            const on = noteAt(openIdx);
+            if(allNotesSet.has(on)) avail.push({fret:0,note:on});
+            for(var f=Math.max(1,winStart);f<=Math.min(winEnd,NUM_FRETS);f++){
+                const n=noteAt(openIdx+f);
+                if(allNotesSet.has(n)) avail.push({fret:f,note:n});
+            }
+            opts.push(avail);
+        }
+        searchV(opts,essNotesSet,rootNote,0,[],results,seen);
+        if(results.length>=30) break;
+    }
+
+    results.sort(function(a,b){
+        const ar=a.bassNote===rootNote?0:1, br=b.bassNote===rootNote?0:1;
+        if(ar!==br)return ar-br;
+        if(b.strings!==a.strings)return b.strings-a.strings;
+        return a.pos-b.pos;
+    });
+
+    const out = results.slice(0,maxResults);
+    voicingCache[cacheKey] = out;
+    return out;
+}
+
+function searchV(opts,essSet,rootNote,si,cur,results,seen){
+    if(results.length>=30) return;
+    if(si===6){
+        const covered=new Set();
+        var strings=0, first=-1, last=-1, minF=99, maxF=0, bass=null;
+        for(var s=5;s>=0;s--){
+            if(cur[s].fret>=0){
+                covered.add(cur[s].note); strings++;
+                if(first===-1)first=s; last=s;
+                if(!bass)bass=cur[s].note;
+                if(cur[s].fret>0){minF=Math.min(minF,cur[s].fret);maxF=Math.max(maxF,cur[s].fret);}
+            }
+        }
+        if(strings<3)return;
+        for(const n of essSet){if(!covered.has(n))return;}
+        for(var ss=last;ss<=first;ss++){if(cur[ss].fret===-1)return;}
+        if(maxF>0&&minF>0&&maxF-minF>4)return;
+        const key=cur.map(function(c){return c.fret;}).join(',');
+        if(seen.has(key))return;
+        seen.add(key);
+        results.push({
+            frets:cur.map(function(c){return c.fret;}),
+            notes:cur.map(function(c){return c.note;}),
+            bassNote:bass, strings:strings, pos: minF===99?0:minF
+        });
+        return;
+    }
+    for(var i=0;i<opts[si].length;i++){
+        cur.push(opts[si][i]);
+        searchV(opts,essSet,rootNote,si+1,cur,results,seen);
+        cur.pop();
+    }
+}
+
+// =====================================================================
+// REVERSE CHORD FINDER
+// =====================================================================
+function identifyChords(placedNotesArr){
+    if(placedNotesArr.length<2)return{matches:[],pitches:[],intervals:[]};
+    const pitches=[...new Set(placedNotesArr.map(function(p){return p.note;}))];
+    if(pitches.length<2)return{matches:[],pitches:pitches,intervals:[]};
+
+    var actualBass = null;
+    for(var s=5;s>=0;s--){
+        const p=placedNotesArr.find(function(x){return x.string===s;});
+        if(p){actualBass=p.note;break;}
+    }
+
+    const matches=[];
+    const matchKeys = new Set();
+    for(var pi=0;pi<pitches.length;pi++){
+        const potRoot = pitches[pi];
+        const ints = pitches.map(function(n){return semi(potRoot,n);}).sort(function(a,b){return a-b;});
+        const uniqueInts = [...new Set(ints)];
+
+        for(var ci=0;ci<CHORD_ID_LIST.length;ci++){
+            const cd = CHORD_ID_LIST[ci];
+            if(cd.intervals.every(function(iv){return uniqueInts.includes(iv);})){
+                var name = potRoot + cd.suffix;
+                const isSlash = actualBass && actualBass !== potRoot;
+                if(isSlash) name += '/' + actualBass;
+                const key = potRoot+'_'+cd.suffix;
+                if(matchKeys.has(key))continue;
+                matchKeys.add(key);
+                matches.push({
+                    name:name, root:potRoot, suffix:cd.suffix,
+                    fullName:cd.name, formula:cd.formula,
+                    isSlash:isSlash, bassNote:actualBass,
+                    specificity: cd.intervals.length,
+                    exact: uniqueInts.length === cd.intervals.length
+                });
+            }
+        }
+    }
+    matches.sort(function(a,b){
+        if(a.exact!==b.exact)return a.exact?-1:1;
+        return b.specificity-a.specificity;
+    });
+
+    const rawInts = pitches.length>0 ?
+        pitches.map(function(n){return semi(pitches[0],n);}).sort(function(a,b){return a-b;}).map(function(iv){return INTERVAL_NAMES[iv];}).join(' - ') : '';
+
+    return{matches:matches,pitches:pitches,intervals:rawInts};
+}
+
+// =====================================================================
+// CONTROLS & INIT
+// =====================================================================
+function initControls(){
+    const rs=document.getElementById('rootSelect');
+    NOTES.forEach(function(n){
+        const o=document.createElement('option');o.value=n;
+        o.textContent=ENHARMONIC[n]?n+' / '+ENHARMONIC[n]:n;
+        if(n===state.root)o.selected=true;rs.appendChild(o);
+    });
+    rs.addEventListener('change',function(e){state.root=e.target.value;state.harmKey=e.target.value;state.clSelectedChord=null;render();});
+    document.getElementById('scaleSelect').addEventListener('change',function(e){
+        state.scaleType=e.target.value;state.displayMode='primary';state.showRelative=false;
+        state.clSelectedChord=null;syncHarmScaleType();render();
+    });
+    document.getElementById('toggleNotes').addEventListener('click',function(){
+        state.showNotes=!state.showNotes;this.classList.toggle('active',state.showNotes);render();
+    });
+    document.getElementById('toggleIntervals').addEventListener('click',function(){
+        state.showIntervals=!state.showIntervals;this.classList.toggle('active',state.showIntervals);render();
+    });
+}
+
+window.setCLMode = function(m){
+    state.clMode=m;
+    document.getElementById('tabLibrary').classList.toggle('active',m==='library');
+    document.getElementById('tabReverse').classList.toggle('active',m==='reverse');
+    state.reverseNotes=[null,null,null,null,null,null];
+    renderChordLibrary();
+};
+
+// =====================================================================
+// RENDER: MODE BUTTONS
+// =====================================================================
+function renderModeButtons(){
+    const c=document.getElementById('modeButtons');c.innerHTML='';
+    const paired=getPairedScale(state.root,state.scaleType);
+    const def=SCALE_DEFS[state.scaleType];
+    if(!state.showRelative){
+        var b=document.createElement('button');b.className='mode-btn active';
+        b.textContent=state.root+' '+def.name;c.appendChild(b);
+        if(hasRelativeScale(state.scaleType)&&paired){
+            b=document.createElement('button');b.className='mode-btn';
+            b.textContent='+ Show Relative Scale';
+            b.addEventListener('click',function(){state.showRelative=true;state.displayMode='both';render();});
+            c.appendChild(b);
+        }
+    } else {
+        [{id:'primary',label:state.root+' '+def.name},{id:'both',label:'Both Scales'},
+         paired?{id:'paired',label:paired.label}:null].filter(Boolean).forEach(function(m){
+            const b=document.createElement('button');
+            b.className='mode-btn'+(state.displayMode===m.id?' active':'');
+            b.textContent=m.label;
+            b.addEventListener('click',function(){state.displayMode=m.id;render();});
+            c.appendChild(b);
+        });
+        const hb=document.createElement('button');hb.className='mode-btn';
+        hb.textContent='× Hide Relative';hb.style.color='#ff6b6b';
+        hb.addEventListener('click',function(){state.showRelative=false;state.displayMode='primary';render();});
+        c.appendChild(hb);
+    }
+}
+
+// =====================================================================
+// RENDER: THEORY PANEL
+// =====================================================================
+function renderTheoryPanel(){
+    const p=document.getElementById('theoryPanel');
+    const def=SCALE_DEFS[state.scaleType];
+    const pn=getScaleNotes(state.root,def);
+    const paired=state.showRelative?getPairedScale(state.root,state.scaleType):null;
+    var h='<div class="panel-title">Scale Information</div>';
+    if(paired){
+        const pd=SCALE_DEFS[paired.type];const pan=getScaleNotes(paired.root,pd);
+        const sh=pn.filter(function(n){return pan.includes(n);});
+        h+='<div class="info-grid">';
+        h+='<div class="info-box"><div class="box-title">'+state.root+' '+def.name+'</div>';
+        h+='<div class="box-notes">'+pn.join(' — ')+'</div>';
+        h+='<div class="box-formula">Formula: '+def.formula+' | Intervals: '+def.intervals.join(', ')+'</div></div>';
+        h+='<div class="info-box paired-box"><div class="box-title">'+paired.label+' (Relative)</div>';
+        h+='<div class="box-notes">'+pan.join(' — ')+'</div>';
+        h+='<div class="box-formula">Formula: '+pd.formula+' | Shared: '+sh.join(', ')+'</div></div>';
+        h+='</div>';
+    } else {
+        h+='<div class="info-box" style="max-width:600px;"><div class="box-title">'+state.root+' '+def.name+'</div>';
+        h+='<div class="box-notes">'+pn.join(' — ')+'</div>';
+        h+='<div class="box-formula">Formula: '+def.formula+' | Intervals: '+def.intervals.join(', ')+'</div></div>';
+    }
+    p.innerHTML=h;
+}
+
+// =====================================================================
+// RENDER: SCALE FRETBOARD
+// =====================================================================
+function renderFretboard(){
+    const fb=document.getElementById('fretboard');
+    const def=SCALE_DEFS[state.scaleType];
+    const pn=getScaleNotes(state.root,def);
+    const paired=state.showRelative?getPairedScale(state.root,state.scaleType):null;
+    const pd=paired?SCALE_DEFS[paired.type]:null;
+    const pan=paired?getScaleNotes(paired.root,pd):null;
+
+    // Practice target info
+    const practiceTarget = getCurrentPracticeTarget();
+    // For scale practice: highlight specific string+fret, not just MIDI
+    const ptStringIdx = (practiceTarget && state.practiceType === 'scale') ? practiceTarget.stringIdx : -1;
+    const ptFret = (practiceTarget && state.practiceType === 'scale') ? practiceTarget.fret : -1;
+    // For chord practice: get pitch classes to highlight ALL occurrences across neck
+    const chordPitchClasses = getPracticeChordPitchClasses();
+
+    var h='';
+    h+='<div class="fb-fret-numbers">';
+    for(var f=1;f<=NUM_FRETS;f++){h+='<div class="fb-fret-num'+(FRET_MARKERS.includes(f)?' marker':'')+'">'+f+'</div>';}
+    h+='</div><div class="fb-body">';
+    STRINGS.forEach(function(str,si){
+        const oi=ni(str.name);
+        h+='<div class="fb-string-row"><div class="fb-open">';
+        const oc=getNoteColor(str.name,pn,pan,state.root,paired?paired.root:null);
+        if(oc){
+            var it=state.displayMode==='paired'&&pd?getIntervalLabel(paired.root,str.name,pd):getIntervalLabel(state.root,str.name,def);
+            const openMidi = STRINGS[si].midi;
+            // Scale practice: highlight specific string+fret; Chord practice: highlight ALL pitch class matches
+            const isScaleTarget = state.practiceActive && state.practiceType === 'scale' && si === ptStringIdx && 0 === ptFret;
+            const isChordTarget = chordPitchClasses && chordPitchClasses.has(str.name);
+            const isTarget = isScaleTarget || isChordTarget;
+            h+='<div class="fb-open-dot '+oc+(isTarget?' practice-target':'')+'" id="fb-note-'+si+'-0" onclick="playNoteAt('+si+',0)">';
+            if(state.showNotes)h+='<span class="note-name">'+str.name+'</span>';
+            if(state.showIntervals)h+='<span class="interval-name">'+it+'</span>';
+            if(state.practiceActive && state.practiceType === 'scale' && state.practiceIdx > 0){
+                const wasHit = state.practiceScaleNotes && state.practiceScaleNotes.slice(0, state.practiceIdx).some(function(n){ return n.stringIdx === si && n.fret === 0; });
+                if(wasHit) h+='<div class="practice-check">&#10003;</div>';
+            }
+            h+='</div>';
+        } else {
+            // During chord practice, also show chord tones on frets that aren't in the scale
+            var chordOpenTarget = chordPitchClasses && chordPitchClasses.has(str.name);
+            if(chordOpenTarget){
+                h+='<div class="fb-open-dot practice-target" style="background:rgba(255,183,3,0.3);" id="fb-note-'+si+'-0" onclick="playNoteAt('+si+',0)">';
+                h+='<span class="note-name" style="color:#ffb703;">'+str.name+'</span>';
+                h+='</div>';
+            } else {
+                h+='<div class="fb-open-dot" style="background:transparent;"><span class="note-name" style="color:#444;font-size:11px;font-weight:700;">'+str.name+'</span></div>';
+            }
+        }
+        h+='</div><div class="fb-frets-area"><div class="fb-wire"><div class="fb-wire-inner"></div></div>';
+        for(var f=1;f<=NUM_FRETS;f++){
+            const fn=noteAt(oi+f);
+            const clr=getNoteColor(fn,pn,pan,state.root,paired?paired.root:null);
+            h+='<div class="fb-cell">';
+            const isChordTone = chordPitchClasses && chordPitchClasses.has(fn);
+            if(clr){
+                var il=state.displayMode==='paired'&&pd?getIntervalLabel(paired.root,fn,pd):getIntervalLabel(state.root,fn,def);
+                if(state.displayMode==='both'&&!pn.includes(fn)&&pan&&pan.includes(fn))il=getIntervalLabel(paired.root,fn,pd);
+                const noteMidi = STRINGS[si].midi + f;
+                const isScaleTarget = state.practiceActive && state.practiceType === 'scale' && si === ptStringIdx && f === ptFret;
+                const isTarget = isScaleTarget || isChordTone;
+                h+='<div class="fb-note '+clr+(isTarget?' practice-target':'')+'" id="fb-note-'+si+'-'+f+'" title="'+fn+' - Fret '+f+'" onclick="playNoteAt('+si+','+f+')">';
+                if(state.showNotes)h+='<span class="note-name">'+fn+'</span>';
+                if(state.showIntervals)h+='<span class="interval-name">'+il+'</span>';
+                if(state.practiceActive && state.practiceType === 'scale' && state.practiceIdx > 0){
+                    const wasHit = state.practiceScaleNotes && state.practiceScaleNotes.slice(0, state.practiceIdx).some(function(n){ return n.stringIdx === si && n.fret === f; });
+                    if(wasHit) h+='<div class="practice-check">&#10003;</div>';
+                }
+                h+='</div>';
+            } else if(isChordTone){
+                // Show chord tone even if not in current scale display
+                h+='<div class="fb-note practice-target" style="background:rgba(255,183,3,0.3);box-shadow:0 0 10px rgba(255,183,3,0.4);" id="fb-note-'+si+'-'+f+'" title="'+fn+' - Fret '+f+'" onclick="playNoteAt('+si+','+f+')">';
+                h+='<span class="note-name" style="color:#ffb703;">'+fn+'</span>';
+                h+='</div>';
+            }
+            h+='</div>';
+        }
+        h+='</div></div>';
+    });
+    h+='<div class="fb-markers">';
+    for(var f=1;f<=NUM_FRETS;f++){
+        h+='<div class="fb-marker-cell">';
+        if(DOUBLE_DOT_FRETS.includes(f))h+='<div class="fb-marker-double"><div class="fb-marker-dot"></div><div class="fb-marker-dot"></div></div>';
+        else if(FRET_MARKERS.includes(f))h+='<div class="fb-marker-dot"></div>';
+        h+='</div>';
+    }
+    h+='</div></div>';
+    fb.innerHTML=h;
+    renderLegend();
+}
+
+function renderLegend(){
+    const lg=document.getElementById('legend');
+    const def=SCALE_DEFS[state.scaleType];
+    const paired=state.showRelative?getPairedScale(state.root,state.scaleType):null;
+    var items=[];
+    if(state.displayMode==='primary'||!state.showRelative){
+        items=[{cls:'clr-root',label:state.root+' (Root)'},{cls:'clr-scale',label:def.name+' Notes'}];
+    } else if(state.displayMode==='paired'&&paired){
+        items=[{cls:'clr-rel-root',label:paired.root+' (Relative Root)'},{cls:'clr-paired',label:paired.label+' Notes'}];
+    } else if(paired){
+        items=[{cls:'clr-root',label:state.root+' (Root)'},{cls:'clr-scale',label:def.name+' Only'},
+               {cls:'clr-rel-root',label:paired.root+' (Relative Root)'},{cls:'clr-paired',label:paired.label+' Only'},
+               {cls:'clr-shared',label:'Shared Notes'}];
+    }
+    lg.innerHTML=items.map(function(i){return '<div class="legend-item"><div class="legend-dot '+i.cls+'"></div><span>'+i.label+'</span></div>';}).join('');
+}
+
+// =====================================================================
+// RENDER: CHORD LIBRARY
+// =====================================================================
+function renderChordLibrary(){
+    const content = document.getElementById('chordLibContent');
+    if(state.clMode==='reverse'){renderReverseChordFinder(content);return;}
+
+    const data = getDiatonicChordsForKey(state.root, state.scaleType);
+    if(!data){content.innerHTML='<div style="color:#666;text-align:center;padding:20px;">Not available for this scale.</div>';return;}
+
+    var h = '';
+
+    data.degrees.forEach(function(deg,di){
+        h+='<div class="cl-degree-section"><div class="cl-degree-header">'+deg.degree+' — '+deg.root+'</div>';
+        h+='<div class="cl-chord-btns">';
+        deg.chords.forEach(function(ch){
+            const ct = CHORD_TYPES[ch.type];
+            if(!ct) return;
+            const label = deg.root + ct.suffix;
+            const isActive = state.clSelectedChord && state.clSelectedChord.degreeIdx===di && state.clSelectedChord.chordType===ch.type;
+            h+='<button class="cl-chord-btn'+(isActive?' active':'')+'" onclick="selectLibChord('+di+',\''+ch.type+'\')">'+label+'</button>';
+        });
+        h+='</div>';
+
+        if(state.clSelectedChord && state.clSelectedChord.degreeIdx===di){
+            const selType = state.clSelectedChord.chordType;
+            const ct = CHORD_TYPES[selType];
+            if(ct){
+                const rootIdx = ni(deg.root);
+                const chordNotes = ct.semi.map(function(s){return noteAt(rootIdx+s);});
+                h+='<div class="cl-chord-detail">';
+                h+='<div class="cl-chord-info">';
+                h+='<span>Chord: <strong>'+deg.root+ct.suffix+'</strong></span>';
+                h+='<span>Type: <strong>'+ct.fullName+'</strong></span>';
+                h+='<span>Notes: <strong>'+chordNotes.join(' - ')+'</strong></span>';
+                h+='<span>Formula: <strong>'+ct.formula+'</strong></span>';
+                h+='</div>';
+
+                const voicings = findGuitarVoicings(deg.root, selType, 8);
+                if(voicings.length > 0){
+                    h += '<div class="cl-voicings">';
+                    voicings.forEach(function(v){
+                        h += renderChordDiagram(v, deg.root, chordNotes);
+                    });
+                    h += '</div>';
+                } else {
+                    h += '<div style="color:#666;font-size:12px;padding:10px;">No standard voicings found for this chord.</div>';
+                }
+                h+='</div>';
+            }
+        }
+        h+='</div>';
+    });
+
+    content.innerHTML = h;
+}
+
+function renderChordDiagram(voicing, root, chordNotes){
+    const frets = voicing.frets;
+    const fretted = frets.filter(function(f){return f>0;});
+    const minFret = fretted.length>0 ? Math.min.apply(null, fretted) : 1;
+    const maxFret = fretted.length>0 ? Math.max.apply(null, fretted) : 1;
+    const startFret = minFret <= 4 ? 1 : minFret;
+    const numFrets = Math.max(4, maxFret - startFret + 1);
+    const isOpenPos = startFret === 1;
+    const posLabel = fretted.length===0 ? 'Open' : (isOpenPos ? 'Open' : ordinal(startFret)+' pos');
+    const fretsStr = frets.join(',');
+
+    var h = '<div class="cd"><div class="cd-pos">'+posLabel+'</div>';
+
+    h += '<div class="cd-marks">';
+    for(var s=5;s>=0;s--){
+        if(frets[s]===-1) h+='<div class="cd-mark">&times;</div>';
+        else if(frets[s]===0) h+='<div class="cd-mark">&cir;</div>';
+        else h+='<div class="cd-mark"></div>';
+    }
+    h += '</div>';
+
+    h += '<div class="cd-grid'+(isOpenPos?'':' no-nut')+'">';
+    for(var row=0;row<numFrets;row++){
+        for(var s=5;s>=0;s--){
+            const fretNum = startFret + row;
+            h += '<div class="cd-gcell">';
+            if(frets[s] === fretNum){
+                const note = noteAt(ni(STRINGS[s].name) + fretNum);
+                const isRoot = note === root;
+                h += '<div class="cd-gdot'+(isRoot?' root':'')+'">'+note+'</div>';
+            }
+            h += '</div>';
+        }
+    }
+    h += '</div>';
+
+    if(!isOpenPos){
+        h += '<div class="cd-fret-label">'+startFret+'fr</div>';
+    }
+
+    // Play button for this voicing
+    h += '<button class="play-btn-sm" onclick="playVoicing(\''+fretsStr+'\')" title="Play chord">&#9654;</button>';
+
+    h += '</div>';
+    return h;
+}
+
+function ordinal(n){
+    const s=['th','st','nd','rd'], v=n%100;
+    return n+(s[(v-20)%10]||s[v]||s[0]);
+}
+
+window.selectLibChord = function(degIdx, chordType){
+    if(state.clSelectedChord && state.clSelectedChord.degreeIdx===degIdx && state.clSelectedChord.chordType===chordType){
+        state.clSelectedChord = null;
+    } else {
+        state.clSelectedChord = {degreeIdx:degIdx, chordType:chordType};
+    }
+    renderChordLibrary();
+};
+
+// =====================================================================
+// RENDER: REVERSE CHORD FINDER
+// =====================================================================
+function renderReverseChordFinder(container){
+    var h = '<div style="margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">';
+    h += '<span style="font-size:13px;color:#aaa;">Click frets to place notes (one per string). Click again to remove.</span>';
+    h += '<button class="mode-btn" onclick="clearReverse()">Clear All</button>';
+    h += '</div>';
+
+    h += '<div class="fretboard-wrap"><div class="fb rcf-fretboard">';
+    h += '<div class="fb-fret-numbers">';
+    for(var f=1;f<=NUM_FRETS;f++){h+='<div class="fb-fret-num'+(FRET_MARKERS.includes(f)?' marker':'')+'">'+f+'</div>';}
+    h += '</div><div class="fb-body">';
+
+    STRINGS.forEach(function(str,si){
+        const oi=ni(str.name);
+        const placed = state.reverseNotes[si];
+        h += '<div class="fb-string-row">';
+        h += '<div class="fb-open" onclick="toggleReverseNote('+si+',0)">';
+        if(placed===0){
+            h += '<div class="rcf-placed">'+str.name+'</div>';
+        } else {
+            h += '<div class="fb-open-dot" style="background:transparent;"><span class="note-name" style="color:#555;font-size:11px;font-weight:700;">'+str.name+'</span></div>';
+        }
+        h += '</div>';
+        h += '<div class="fb-frets-area"><div class="fb-wire"><div class="fb-wire-inner"></div></div>';
+        for(var f=1;f<=NUM_FRETS;f++){
+            const fn = noteAt(oi+f);
+            h += '<div class="fb-cell" onclick="toggleReverseNote('+si+','+f+')">';
+            if(placed===f){
+                h += '<div class="rcf-placed">'+fn+'</div>';
+            }
+            h += '</div>';
+        }
+        h += '</div></div>';
+    });
+
+    h += '<div class="fb-markers">';
+    for(var f=1;f<=NUM_FRETS;f++){
+        h+='<div class="fb-marker-cell">';
+        if(DOUBLE_DOT_FRETS.includes(f))h+='<div class="fb-marker-double"><div class="fb-marker-dot"></div><div class="fb-marker-dot"></div></div>';
+        else if(FRET_MARKERS.includes(f))h+='<div class="fb-marker-dot"></div>';
+        h+='</div>';
+    }
+    h += '</div></div></div></div>';
+
+    // Play placed notes as chord
+    const placed = [];
+    for(var s=0;s<6;s++){
+        if(state.reverseNotes[s]!==null){
+            placed.push({string:s, fret:state.reverseNotes[s], note:noteAt(ni(STRINGS[s].name)+state.reverseNotes[s])});
+        }
+    }
+
+    if(placed.length >= 2){
+        h += '<div style="margin-top:10px;"><button class="play-btn-sm" onclick="playReverseChord()" title="Play placed notes" style="width:auto;padding:4px 12px;border-radius:6px;">&#9654; Play</button></div>';
+        const result = identifyChords(placed);
+        h += '<div class="rcf-results">';
+        if(result.matches.length > 0){
+            result.matches.slice(0,12).forEach(function(m,i){
+                h += '<div class="rcf-match'+(i===0?' best':'')+'">';
+                h += '<div class="chord-name">'+m.name+'</div>';
+                h += '<div class="chord-formula">'+m.fullName+' — '+m.formula+'</div>';
+                h += '</div>';
+            });
+        } else {
+            h += '<div class="rcf-match"><div class="chord-name" style="color:#ff6b6b;">No known chord match</div></div>';
+        }
+        h += '</div>';
+        h += '<div class="rcf-raw">Notes: '+placed.map(function(p){return p.note;}).join(' - ')+' | Intervals from '+(placed[placed.length-1]?placed[placed.length-1].note:'?')+': '+result.intervals+'</div>';
+    } else if(placed.length === 1){
+        h += '<div style="color:#666;font-size:12px;margin-top:10px;">Place at least 2 notes to identify a chord.</div>';
+    }
+
+    container.innerHTML = h;
+}
+
+window.toggleReverseNote = function(stringIdx, fret){
+    if(state.reverseNotes[stringIdx] === fret){
+        state.reverseNotes[stringIdx] = null;
+    } else {
+        state.reverseNotes[stringIdx] = fret;
+    }
+    renderChordLibrary();
+};
+
+window.clearReverse = function(){
+    state.reverseNotes = [null,null,null,null,null,null];
+    renderChordLibrary();
+};
+
+window.playReverseChord = function(){
+    const frets = state.reverseNotes.map(function(f){ return f === null ? -1 : f; });
+    const midiArr = [];
+    frets.forEach(function(f, s){
+        if(f >= 0) midiArr.push(getMidi(s, f));
+    });
+    if(midiArr.length > 0) playMidiChord(midiArr, true);
+};
+
+// =====================================================================
+// RENDER: HARMONIZED FULL-NECK VIEW
+// =====================================================================
+function getTriadsForScale(root,scaleType){
+    const def=SCALE_DEFS[scaleType];if(!def||def.semitones.length<7){
+        if(scaleType==='minorPentatonic'||scaleType==='blues')return getTriadsForScale(root,'naturalMinor');
+        if(scaleType==='majorPentatonic')return getTriadsForScale(root,'major');return null;
+    }
+    const sn=getScaleNotes(root,def);
+    var qp,dl;
+    if(scaleType==='major'){qp=MAJOR_TRIAD_PATTERN;dl=DEGREE_LABELS_MAJOR;}
+    else if(scaleType==='harmonicMinor'){qp=HARMONIC_MINOR_TRIAD_PATTERN;dl=DEGREE_LABELS_HARM_MINOR;}
+    else{qp=MINOR_TRIAD_PATTERN;dl=DEGREE_LABELS_MINOR;}
+    const triads=[];
+    for(var i=0;i<7;i++){
+        const cr=sn[i],q=qp[i],ints=TRIAD_INTERVALS[q],ri=ni(cr);
+        triads.push({root:cr,quality:q,notes:ints.map(function(s){return noteAt(ri+s);}),degree:dl[i],label:cr+TRIAD_SUFFIX[q]});
+    }
+    return{triads:triads,scaleNotes:sn,parentType:scaleType};
+}
+
+function getAllTriadVoicingsOnNeck(cn,sgi,inv){
+    const ord=[[0,1,2],[1,2,0],[2,0,1]];
+    const no=ord[inv].map(function(i){return cn[i];});
+    const bt=[...sgi].reverse();const vs=[];
+    for(var a=0;a<=NUM_FRETS;a++){
+        const v=[];var ok=true;
+        for(var s=0;s<3;s++){
+            const si=bt[s],tn=no[s],on=ni(STRINGS[si].name);
+            var bf=-1,bd=999;
+            for(var f=0;f<=NUM_FRETS;f++){if(noteAt(on+f)===tn){const d=Math.abs(f-a);if(d<bd){bd=d;bf=f;}}}
+            if(bf===-1){ok=false;break;}v.push({string:si,fret:bf,note:tn});
+        }
+        if(!ok)continue;
+        const fs=v.map(function(x){return x.fret;}),fnz=fs.filter(function(f){return f>0;});
+        const sp=fnz.length>0?Math.max.apply(null,fnz)-Math.min.apply(null,fnz):0;
+        if(sp<=4){const k=v.map(function(x){return x.string+':'+x.fret;}).join('|');if(!vs.some(function(x){return x.key===k;}))vs.push({voicing:v,key:k});}
+    }
+    return vs;
+}
+
+function renderHarmonizedFullNeck(){
+    const content=document.getElementById('harmContent');
+    const td=getTriadsForScale(state.harmKey,state.harmScaleType);
+    if(!td){content.innerHTML='<div style="color:#666;text-align:center;padding:20px;">Not available.</div>';return;}
+    const triads=td.triads;const sg=STRING_GROUPS[state.harmStringGroup];const inv=state.harmInversion;
+    const invNames=['Root Position','1st Inversion','2nd Inversion'];
+    var h='<div class="harm-controls">';
+    h+='<div class="control-group"><label>Key</label><select id="harmKeySelect">';
+    NOTES.forEach(function(n){const l=ENHARMONIC[n]?n+' / '+ENHARMONIC[n]:n;h+='<option value="'+n+'"'+(n===state.harmKey?' selected':'')+'>'+l+'</option>';});
+    h+='</select></div>';
+    h+='<div class="control-group"><label>Parent Scale</label><select id="harmScaleSelect">';
+    ['major','naturalMinor','harmonicMinor'].forEach(function(t){h+='<option value="'+t+'"'+(t===state.harmScaleType?' selected':'')+'>'+SCALE_DEFS[t].name+'</option>';});
+    h+='</select></div>';
+    h+='<div class="control-group"><label>Inversion</label><div class="btn-group">';
+    invNames.forEach(function(n,i){h+='<button class="mode-btn'+(i===inv?' active':'')+'" onclick="setHarmInversion('+i+')">'+n+'</button>';});
+    h+='</div></div></div>';
+    h+='<div class="harm-sg-tabs">';
+    STRING_GROUPS.forEach(function(g,i){h+='<button class="sg-tab'+(i===state.harmStringGroup?' active':'')+'" onclick="setHarmStringGroup('+i+')">'+g.label+' Strings</button>';});
+    h+='</div>';
+
+    const cellMap={};const usedStrings=new Set(sg.indices);
+    triads.forEach(function(ch,ci){
+        getAllTriadVoicingsOnNeck(ch.notes,sg.indices,inv).forEach(function(item){
+            item.voicing.forEach(function(v){const k=v.string+'-'+v.fret;if(!cellMap[k])cellMap[k]={chordIdx:ci,note:v.note};});
+        });
+    });
+
+    h+='<div class="fretboard-wrap"><div class="fb"><div class="fb-fret-numbers">';
+    for(var f=1;f<=NUM_FRETS;f++){h+='<div class="fb-fret-num'+(FRET_MARKERS.includes(f)?' marker':'')+'">'+f+'</div>';}
+    h+='</div><div class="fb-body">';
+    STRINGS.forEach(function(str,si){
+        const oi=ni(str.name);const used=usedStrings.has(si);
+        h+='<div class="fb-string-row"><div class="fb-open">';
+        if(used){const ck=si+'-0';const c=cellMap[ck];
+            if(c)h+='<div class="fb-open-dot chord-clr-'+c.chordIdx+'" onclick="playNoteAt('+si+',0)"><span class="note-name">'+c.note+'</span></div>';
+            else h+='<div class="fb-open-dot" style="background:transparent;"><span class="note-name" style="color:#444;font-size:11px;font-weight:700;">'+str.name+'</span></div>';
+        } else h+='<div class="fb-open-dot" style="background:transparent;"><span class="note-name" style="color:#333;font-size:11px;font-weight:700;">'+str.name+'</span></div>';
+        h+='</div><div class="fb-frets-area">';
+        h+='<div class="fb-wire"><div class="fb-wire-inner" style="opacity:'+(used?'0.7':'0.25')+';"></div></div>';
+        for(var f=1;f<=NUM_FRETS;f++){
+            h+='<div class="fb-cell">';
+            if(used){const ck=si+'-'+f;const c=cellMap[ck];
+                if(c)h+='<div class="fb-note chord-clr-'+c.chordIdx+'" title="'+c.note+' - Fret '+f+' - '+triads[c.chordIdx].label+'" onclick="playNoteAt('+si+','+f+')"><span class="note-name">'+c.note+'</span></div>';
+            }
+            h+='</div>';
+        }
+        h+='</div></div>';
+    });
+    h+='<div class="fb-markers">';
+    for(var f=1;f<=NUM_FRETS;f++){h+='<div class="fb-marker-cell">';
+        if(DOUBLE_DOT_FRETS.includes(f))h+='<div class="fb-marker-double"><div class="fb-marker-dot"></div><div class="fb-marker-dot"></div></div>';
+        else if(FRET_MARKERS.includes(f))h+='<div class="fb-marker-dot"></div>';
+        h+='</div>';
+    }
+    h+='</div></div></div></div>';
+
+    h+='<div class="harm-legend">';
+    triads.forEach(function(t,i){
+        h+='<div class="harm-legend-item">';
+        h+='<div class="harm-legend-dot chord-clr-'+i+'"></div>';
+        h+='<span><strong>'+t.degree+'</strong> '+t.label+' <span style="color:#888;">('+t.notes.join('-')+')</span></span>';
+        h+='<button class="play-btn-sm" onclick="playHarmChord('+i+')" title="Play '+t.label+'" style="margin-left:4px;">&#9654;</button>';
+        h+='</div>';
+    });
+    h+='</div>';
+    content.innerHTML=h;
+    document.getElementById('harmKeySelect').addEventListener('change',function(e){state.harmKey=e.target.value;renderHarmonizedFullNeck();});
+    document.getElementById('harmScaleSelect').addEventListener('change',function(e){state.harmScaleType=e.target.value;renderHarmonizedFullNeck();});
+}
+
+window.setHarmInversion=function(i){state.harmInversion=i;renderHarmonizedFullNeck();};
+window.setHarmStringGroup=function(i){state.harmStringGroup=i;renderHarmonizedFullNeck();};
+
+// =====================================================================
+// MAIN RENDER
+// =====================================================================
+function render(){
+    renderModeButtons();renderTheoryPanel();renderFretboard();
+    renderChordLibrary();renderHarmonizedFullNeck();
+    if(state.practiceActive) renderPracticePanel();
+}
+
+syncHarmScaleType();initControls();render();
+</script>
+</body>
+</html>
