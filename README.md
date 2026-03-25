@@ -1,4 +1,4 @@
-# Fretboard Lord
+# Phantom Note
 
 Try it here!!!: https://milothewalrus.github.io/Fretboard_Lord/
 
