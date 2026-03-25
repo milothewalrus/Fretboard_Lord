@@ -1,5 +1,7 @@
 # Fretboard Lord
 
+Try it here!!!: https://milothewalrus.github.io/Fretboard_Lord/
+
 Guitar scale and harmony practice tool.
 
 ## Features
