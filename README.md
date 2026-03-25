@@ -1,6 +1,6 @@
 # Phantom Note
 
-Try it here!!!: https://milothewalrus.github.io/Fretboard_Lord/
+Try it here!!!: https://milothewalrus.github.io/Phantom_Note/
 
 Guitar scale and harmony practice tool.
 
