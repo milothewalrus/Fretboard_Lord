@@ -338,11 +338,154 @@
             z-index: 10;
         }
 
+        /* ========== MAIN TAB NAVIGATION ========== */
+        .main-tab-bar {
+            display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;
+            position: sticky; top: 0; z-index: 50; padding: 12px 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: 1px solid rgba(121,40,202,0.3);
+        }
+        .main-tab-btn {
+            padding: 10px 16px; background: #0f3460; border: 1px solid rgba(121,40,202,0.4);
+            color: #a0a0a0; border-radius: 8px; font-size: 13px; cursor: pointer;
+            font-weight: 700; transition: all 0.2s ease; white-space: nowrap;
+        }
+        .main-tab-btn:hover { border-color: #00d4ff; color: #e0e0e0; }
+        .main-tab-btn.active {
+            background: #7928ca; border-color: #00d4ff; color: #fff;
+            box-shadow: 0 0 12px rgba(121,40,202,0.5);
+        }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        /* ========== LYRICS & CHORDS SCROLLER ========== */
+        .scroller-tab-btn { position: relative; }
+        .scroller-top-bar {
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px;
+        }
+        .scroller-top-bar select, .scroller-top-bar button, .scroller-top-bar input {
+            font-size: 13px;
+        }
+        .scroller-editor {
+            width: 100%; min-height: 180px; background: #0a1628; color: #e0e0e0;
+            border: 1px solid rgba(121,40,202,0.4); border-radius: 6px; padding: 12px;
+            font-family: 'Courier New', monospace; font-size: 14px; resize: vertical;
+        }
+        .scroller-editor::placeholder { color: #555; }
+        .scroller-display {
+            position: relative; width: 100%; height: 420px; background: #080e1a;
+            border: 1px solid rgba(121,40,202,0.5); border-radius: 8px; overflow: hidden;
+            margin: 14px 0;
+        }
+        .scroller-display-inner {
+            position: absolute; top: 0; left: 0; right: 0;
+            padding: 30px 24px 60px 24px; transition: none;
+        }
+        .scroller-line {
+            margin-bottom: 4px; white-space: pre-wrap; line-height: 1.6;
+        }
+        .scroller-line-chords {
+            color: #00d4ff; font-weight: 700; letter-spacing: 0.5px;
+        }
+        .scroller-line-lyrics {
+            color: #ffffff;
+        }
+        .scroller-line-empty {
+            height: 1.2em;
+        }
+        .scroller-font-sm .scroller-line { font-size: 16px; }
+        .scroller-font-md .scroller-line { font-size: 22px; }
+        .scroller-font-lg .scroller-line { font-size: 28px; }
+        .scroller-transport {
+            display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+        }
+        .scroller-transport button {
+            padding: 8px 16px; background: #0f3460; border: 1px solid #7928ca;
+            color: #e0e0e0; border-radius: 6px; font-size: 13px; cursor: pointer;
+            font-weight: 700; transition: all 0.2s ease;
+        }
+        .scroller-transport button:hover { border-color: #00d4ff; box-shadow: 0 0 8px rgba(0,212,255,0.2); }
+        .scroller-transport button.sc-active { background: #7928ca; border-color: #00d4ff; }
+        .scroller-speed-group {
+            display: flex; align-items: center; gap: 8px; margin-left: 8px;
+        }
+        .scroller-speed-group label { font-size: 11px; color: #7928ca; font-weight: 700; text-transform: uppercase; }
+        .scroller-speed-group input[type="range"] {
+            width: 120px; accent-color: #7928ca;
+        }
+        .scroller-speed-val { font-size: 13px; color: #00d4ff; min-width: 36px; text-align: center; font-family: 'Courier New', monospace; }
+        .scroller-font-group {
+            display: flex; align-items: center; gap: 6px; margin-left: auto;
+        }
+        .scroller-font-group label { font-size: 11px; color: #7928ca; font-weight: 700; text-transform: uppercase; }
+        .sc-font-btn {
+            padding: 4px 10px; background: #0f3460; border: 1px solid #7928ca;
+            color: #e0e0e0; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;
+        }
+        .sc-font-btn.active { background: #7928ca; border-color: #00d4ff; }
+        /* Metronome / Drum Beat controls */
+        .sc-metro-row {
+            display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px;
+            padding: 10px 0; border-top: 1px solid rgba(121,40,202,0.25);
+        }
+        .sc-metro-row label { font-size: 11px; color: #7928ca; font-weight: 700; text-transform: uppercase; }
+        .sc-metro-row select, .sc-metro-row input[type="number"] {
+            padding: 5px 8px; background: #0f3460; border: 1px solid #7928ca;
+            color: #e0e0e0; border-radius: 4px; font-size: 13px; font-weight: 600; width: auto;
+        }
+        .sc-metro-row input[type="number"] { width: 62px; text-align: center; }
+        .sc-metro-row input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
+        .sc-metro-toggle {
+            padding: 5px 12px; background: #0f3460; border: 1px solid #7928ca;
+            color: #e0e0e0; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .sc-metro-toggle:hover { border-color: #00d4ff; }
+        .sc-metro-toggle.active { background: #7928ca; border-color: #00d4ff; }
+        .sc-metro-indicator {
+            display: inline-flex; gap: 4px; align-items: center; margin-left: 4px;
+        }
+        .sc-beat-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #1a2744;
+            border: 1px solid #7928ca; transition: background 0.08s;
+        }
+        .sc-beat-dot.lit { background: #00d4ff; border-color: #00d4ff; box-shadow: 0 0 6px rgba(0,212,255,0.5); }
+        .sc-beat-dot.accent { background: #ff006e; border-color: #ff006e; box-shadow: 0 0 6px rgba(255,0,110,0.5); }
+        .scroller-lib-bar {
+            display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px;
+        }
+        .scroller-lib-bar select {
+            min-width: 160px; padding: 6px 10px; background: #0f3460; border: 1px solid #7928ca;
+            color: #e0e0e0; border-radius: 6px; font-size: 13px;
+        }
+        .scroller-lib-bar button {
+            padding: 6px 12px; background: #0f3460; border: 1px solid #7928ca;
+            color: #e0e0e0; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;
+        }
+        .scroller-lib-bar button:hover { border-color: #00d4ff; }
+        .scroller-section-label {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; color: #7928ca; margin-bottom: 6px; margin-top: 14px;
+        }
+        .scroller-hint {
+            font-size: 12px; color: #666; margin-top: 4px;
+        }
+        .scroller-gradient-top, .scroller-gradient-bottom {
+            position: absolute; left: 0; right: 0; height: 40px; pointer-events: none; z-index: 2;
+        }
+        .scroller-gradient-top { top: 0; background: linear-gradient(to bottom, #080e1a, transparent); }
+        .scroller-gradient-bottom { bottom: 0; background: linear-gradient(to top, #080e1a, transparent); }
+
         @media (max-width: 768px) {
             .info-grid { grid-template-columns: 1fr; }
             body { padding: 10px; }
             h1 { font-size: 22px; }
             .mic-hud { top: auto; bottom: 12px; right: 12px; }
+            .scroller-display { height: 320px; }
+            .scroller-font-group { margin-left: 0; margin-top: 6px; }
+            .scroller-display-inner { padding: 20px 14px 40px 14px; }
+            .main-tab-bar { gap: 4px; padding: 8px 0; }
+            .main-tab-btn { padding: 8px 10px; font-size: 11px; }
         }
     </style>
 </head>
@@ -351,69 +494,174 @@
     <h1>Fretboard Lord</h1>
     <p class="subtitle">Guitar Scale & Harmony Practice Tool</p>
 
-    <div class="controls">
-        <div class="control-group">
-            <label>Root Note</label>
-            <select id="rootSelect"></select>
-        </div>
-        <div class="control-group">
-            <label>Scale Type</label>
-            <select id="scaleSelect">
-                <option value="major">Major Scale</option>
-                <option value="naturalMinor">Natural Minor Scale</option>
-                <option value="minorPentatonic" selected>Minor Pentatonic</option>
-                <option value="majorPentatonic">Major Pentatonic</option>
-                <option value="blues">Blues Scale</option>
-                <option value="harmonicMinor">Harmonic Minor</option>
-            </select>
-        </div>
-        <div class="control-group">
-            <label>Display</label>
-            <div class="btn-group" id="modeButtons"></div>
-        </div>
-        <div class="control-group">
-            <label>Options</label>
-            <div class="btn-group">
-                <button class="toggle-btn active" id="toggleNotes">Notes</button>
-                <button class="toggle-btn active" id="toggleIntervals">Intervals</button>
+    <!-- ========== MAIN TAB NAVIGATION ========== -->
+    <div class="main-tab-bar" id="mainTabBar">
+        <button class="main-tab-btn active" onclick="switchTab(1)">Scales & Practice</button>
+        <button class="main-tab-btn" onclick="switchTab(2)">Harmonized Neck</button>
+        <button class="main-tab-btn" onclick="switchTab(3)">Chord Library</button>
+        <button class="main-tab-btn" onclick="switchTab(4)">Chord Finder</button>
+        <button class="main-tab-btn" onclick="switchTab(5)">Lyrics & Chords</button>
+    </div>
+
+    <!-- ========== TAB 1: SCALES & PRACTICE ========== -->
+    <div class="tab-pane active" id="tabPane1">
+        <div class="controls">
+            <div class="control-group">
+                <label>Root Note</label>
+                <select id="rootSelect"></select>
+            </div>
+            <div class="control-group">
+                <label>Scale Type</label>
+                <select id="scaleSelect">
+                    <option value="major">Major Scale</option>
+                    <option value="naturalMinor">Natural Minor Scale</option>
+                    <option value="minorPentatonic" selected>Minor Pentatonic</option>
+                    <option value="majorPentatonic">Major Pentatonic</option>
+                    <option value="blues">Blues Scale</option>
+                    <option value="harmonicMinor">Harmonic Minor</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Display</label>
+                <div class="btn-group" id="modeButtons"></div>
+            </div>
+            <div class="control-group">
+                <label>Options</label>
+                <div class="btn-group">
+                    <button class="toggle-btn active" id="toggleNotes">Notes</button>
+                    <button class="toggle-btn active" id="toggleIntervals">Intervals</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>Audio</label>
+                <div class="btn-group">
+                    <button class="mic-btn" id="micToggle" onclick="toggleMic()">Mic Off</button>
+                    <button class="practice-btn" id="practiceToggle" onclick="togglePractice()">Practice</button>
+                </div>
             </div>
         </div>
-        <div class="control-group">
-            <label>Audio</label>
-            <div class="btn-group">
-                <button class="mic-btn" id="micToggle" onclick="toggleMic()">Mic Off</button>
-                <button class="practice-btn" id="practiceToggle" onclick="togglePractice()">Practice</button>
+
+        <div id="practicePanel" style="display:none;"></div>
+        <div class="panel" id="theoryPanel"></div>
+        <div class="panel">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
+                <div class="panel-title" style="margin-bottom:0;">Fretboard</div>
+                <button class="play-btn" onclick="playCurrentScale()" title="Play scale">&#9654;</button>
             </div>
+            <div class="fretboard-wrap"><div class="fb" id="fretboard"></div></div>
+            <div class="legend" id="legend"></div>
         </div>
     </div>
 
-    <div id="practicePanel" style="display:none;"></div>
-
-    <div class="panel" id="theoryPanel"></div>
-
-    <div class="panel">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
-            <div class="panel-title" style="margin-bottom:0;">Fretboard</div>
-            <button class="play-btn" onclick="playCurrentScale()" title="Play scale">&#9654;</button>
+    <!-- ========== TAB 2: HARMONIZED SCALE — FULL NECK ========== -->
+    <div class="tab-pane" id="tabPane2">
+        <div class="panel">
+            <div class="panel-title">Harmonized Scale — Full Neck View</div>
+            <div id="harmContent"></div>
         </div>
-        <div class="fretboard-wrap"><div class="fb" id="fretboard"></div></div>
-        <div class="legend" id="legend"></div>
     </div>
 
-    <div class="panel" id="chordLibPanel">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
-            <div class="panel-title" style="margin-bottom:0;">Chord Library</div>
-            <div class="btn-group">
-                <button class="mode-btn active" id="tabLibrary" onclick="setCLMode('library')">Diatonic Chords</button>
-                <button class="mode-btn" id="tabReverse" onclick="setCLMode('reverse')">Reverse Chord Finder</button>
+    <!-- ========== TAB 3: CHORD LIBRARY ========== -->
+    <div class="tab-pane" id="tabPane3">
+        <div class="panel">
+            <div class="panel-title" style="margin-bottom:12px;">Chord Library — Diatonic Chords</div>
+            <div class="controls" style="margin-bottom:14px;justify-content:flex-start;">
+                <div class="control-group">
+                    <label>Root Note</label>
+                    <select id="clRootSelect"></select>
+                </div>
+                <div class="control-group">
+                    <label>Scale Type</label>
+                    <select id="clScaleSelect">
+                        <option value="major">Major Scale</option>
+                        <option value="naturalMinor">Natural Minor Scale</option>
+                        <option value="minorPentatonic" selected>Minor Pentatonic</option>
+                        <option value="majorPentatonic">Major Pentatonic</option>
+                        <option value="blues">Blues Scale</option>
+                        <option value="harmonicMinor">Harmonic Minor</option>
+                    </select>
+                </div>
+            </div>
+            <div id="chordLibContent"></div>
+        </div>
+    </div>
+
+    <!-- ========== TAB 4: REVERSE CHORD FINDER ========== -->
+    <div class="tab-pane" id="tabPane4">
+        <div class="panel">
+            <div class="panel-title" style="margin-bottom:12px;">Reverse Chord Finder</div>
+            <div id="reverseContent"></div>
+        </div>
+    </div>
+
+    <!-- ========== TAB 5: LYRICS & CHORDS SCROLLER ========== -->
+    <div class="tab-pane" id="tabPane5">
+        <div class="panel" id="scrollerPanel">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
+                <div class="panel-title" style="margin-bottom:0;">Lyrics &amp; Chords Scroller</div>
+                <div class="btn-group">
+                    <button class="mode-btn active" id="scTabEdit" onclick="setScrollerTab('edit')">Edit</button>
+                    <button class="mode-btn" id="scTabScroll" onclick="setScrollerTab('scroll')">Scroll</button>
+                </div>
+            </div>
+
+            <!-- EDIT VIEW -->
+            <div id="scrollerEditView">
+                <div class="scroller-section-label">Song Library</div>
+                <div class="scroller-lib-bar">
+                    <select id="scSongSelect" onchange="scLoadSelectedSong()">
+                        <option value="">— New Song —</option>
+                    </select>
+                    <input type="text" id="scSongName" placeholder="Song title" style="padding:6px 10px;background:#0a1628;border:1px solid rgba(121,40,202,0.4);color:#e0e0e0;border-radius:6px;font-size:13px;min-width:140px;">
+                    <button onclick="scSaveSong()">Save</button>
+                    <button onclick="scRenameSong()">Rename</button>
+                    <button onclick="scDeleteSong()">Delete</button>
+                </div>
+                <div class="scroller-section-label" style="margin-top:16px;">Lyrics &amp; Chords</div>
+                <textarea id="scTextarea" class="scroller-editor" placeholder="Paste lyrics with chord annotations, e.g.&#10;&#10;[G]Amazing grace, how [C]sweet the [G]sound&#10;That [G]saved a [Em]wretch like [D]me&#10;[G]I once was [G7]lost but [C]now am [G]found&#10;Was [G]blind but [D]now I [G]see&#10;&#10;Use [Chord] notation inline with lyrics.&#10;Blank lines create section breaks."></textarea>
+                <div class="scroller-hint">Use [Chord] notation inline. Blank lines create visual breaks. Press "Scroll" tab to start scrolling.</div>
+            </div>
+
+            <!-- SCROLL VIEW -->
+            <div id="scrollerScrollView" style="display:none;">
+                <div class="scroller-transport">
+                    <button id="scPlayBtn" onclick="scTogglePlay()">Play</button>
+                    <button onclick="scReset()">Reset</button>
+                    <div class="scroller-speed-group">
+                        <label>Speed</label>
+                        <input type="range" id="scSpeedSlider" min="1" max="150" value="100" step="1" oninput="scUpdateSpeed()">
+                        <span class="scroller-speed-val" id="scSpeedVal">1.00x</span>
+                    </div>
+                    <div class="scroller-font-group">
+                        <label>Font</label>
+                        <button class="sc-font-btn" onclick="scSetFont('sm')">S</button>
+                        <button class="sc-font-btn active" onclick="scSetFont('md')">M</button>
+                        <button class="sc-font-btn" onclick="scSetFont('lg')">L</button>
+                    </div>
+                </div>
+                <!-- Metronome / Drum Beat row -->
+                <div class="sc-metro-row">
+                    <button class="sc-metro-toggle" id="scMetroBtn" onclick="scToggleMetro()">Metronome</button>
+                    <label>BPM</label>
+                    <input type="number" id="scBpmInput" min="20" max="300" value="120" onchange="scUpdateBpm()" oninput="scUpdateBpm()">
+                    <label>Time</label>
+                    <select id="scTimeSigSelect" onchange="scUpdateTimeSig()">
+                        <option value="2/4">2/4</option>
+                        <option value="3/4">3/4</option>
+                        <option value="4/4" selected>4/4</option>
+                        <option value="6/8">6/8</option>
+                    </select>
+                    <button class="sc-metro-toggle" id="scDrumBtn" onclick="scToggleDrumMode()">Drum Beat</button>
+                    <div class="sc-metro-indicator" id="scBeatIndicator"></div>
+                </div>
+                <div class="scroller-display scroller-font-md" id="scDisplay">
+                    <div class="scroller-gradient-top"></div>
+                    <div class="scroller-display-inner" id="scDisplayInner"></div>
+                    <div class="scroller-gradient-bottom"></div>
+                </div>
+                <div class="scroller-hint">Spacebar = play/pause &nbsp;|&nbsp; R = reset &nbsp;|&nbsp; Arrow Up/Down = adjust speed &nbsp;|&nbsp; M = metronome on/off</div>
             </div>
         </div>
-        <div id="chordLibContent"></div>
-    </div>
-
-    <div class="panel" id="harmPanel">
-        <div class="panel-title">Harmonized Scale — Full Neck View</div>
-        <div id="harmContent"></div>
     </div>
 </div>
 
@@ -535,24 +783,39 @@ const INTERVAL_NAMES = {0:'R',1:'b2',2:'2',3:'b3',4:'3',5:'4',6:'b5',7:'5',8:'#5
 // =====================================================================
 // STATE
 // =====================================================================
+// Tab 1: Scales & Practice state (main state — used by fretboard, theory, practice)
 let state = {
     root:'E', scaleType:'minorPentatonic', displayMode:'primary',
     showRelative:false, showNotes:true, showIntervals:true,
-    harmKey:'E', harmScaleType:'naturalMinor', harmInversion:0, harmStringGroup:0,
-    clMode:'library',
-    clSelectedChord:null,
-    reverseNotes:[null,null,null,null,null,null],
-    // Audio
+    // Audio (shared)
     audioReady:false,
-    // Mic
+    // Mic (shared)
     micActive:false,
     // Practice
     practiceActive:false, practiceType:'scale', practiceBPM:80, practiceTempoMode:'free',
     practiceIdx:0, practiceHits:0, practiceMisses:0, practiceStreak:0,
-    practiceLoop:false, practiceStartAsc:true, // true = start ascending, false = start descending
-    practiceScaleNotes:[], // [{note, midi, stringIdx, fret, positionIdx, ascending}]
-    practicePositions:[], // computed positions for display
+    practiceLoop:false, practiceStartAsc:true,
+    practiceScaleNotes:[],
+    practicePositions:[],
 };
+
+// Tab 2: Harmonized Scale state (independent)
+let harmState = {
+    harmKey:'E', harmScaleType:'naturalMinor', harmInversion:0, harmStringGroup:0
+};
+
+// Tab 3: Chord Library state (independent)
+let clState = {
+    root:'E', scaleType:'minorPentatonic', clSelectedChord:null
+};
+
+// Tab 4: Reverse Chord Finder state (independent)
+let reverseState = {
+    reverseNotes:[null,null,null,null,null,null]
+};
+
+// Active tab tracking
+var activeTab = 1;
 
 // =====================================================================
 // AUDIO ENGINE (Tone.js)
@@ -695,7 +958,7 @@ window.playVoicing = function(fretsStr){
 
 // Play harmonized chord by chord index
 window.playHarmChord = function(chordIdx){
-    const td = getTriadsForScale(state.harmKey, state.harmScaleType);
+    const td = getTriadsForScale(harmState.harmKey, harmState.harmScaleType);
     if(!td) return;
     const ch = td.triads[chordIdx];
     if(!ch) return;
@@ -886,7 +1149,7 @@ window.togglePractice = function(){
 function buildScalePositions(root, scaleType){
     var def = SCALE_DEFS[scaleType];
     var rootIdx = ni(root);
-    var maxPerStr = def.semitones.length <= 6 ? 2 : 3; // pent/blues = 2, 7-note = 3
+    var is7note = def.semitones.length >= 7;
 
     // All scale notes on each string (index 0 = high e, ..., 5 = low E)
     var strNotes = [];
@@ -916,14 +1179,34 @@ function buildScalePositions(root, scaleType){
         var wLow = Math.max(0, af - 1);
         var wHigh = af + span + 1;
 
-        var posStrings = []; // [lowE notes, A notes, D notes, G notes, B notes, highE notes]
+        // posStrings: index 0 = low E, 1 = A, 2 = D, 3 = G, 4 = B, 5 = high e
+        var posStrings = [];
         for(var s = 5; s >= 0; s--){
+            var ps = 5 - s; // ps: 0=lowE, 1=A, 2=D, 3=G, 4=B, 5=highE
             var inWindow = strNotes[s].filter(function(n){
                 return n.fret >= wLow && n.fret <= wHigh;
             });
-            // Trim to maxPerStr, keeping the ones closest to anchor
-            if(inWindow.length > maxPerStr){
-                inWindow = inWindow.slice(0, maxPerStr);
+
+            // Determine max notes for this string in this position
+            var maxN;
+            if(!is7note){
+                // Pentatonic/blues: always 2 per string
+                maxN = 2;
+            } else {
+                // 7-note scales: alternate bass(3)/treble(2) pattern per position
+                // Even positions: bass strings (lowE,A,D) get 3, treble (G,B,highE) get 2
+                // Odd positions:  bass strings get 2, treble strings get 3
+                // This creates the CAGED diagonal shift
+                var isBass = (ps < 3); // lowE, A, D
+                if(ai % 2 === 0){
+                    maxN = isBass ? 3 : 2;
+                } else {
+                    maxN = isBass ? 2 : 3;
+                }
+            }
+
+            if(inWindow.length > maxN){
+                inWindow = inWindow.slice(0, maxN);
             }
             posStrings.push(inWindow);
         }
@@ -964,7 +1247,15 @@ function buildPillarPracticeSequence(root, scaleType, startAscending){
             }
         }
     }
-    return { sequence:sequence, positions:positions };
+    // Deduplicate: remove consecutive notes with the same MIDI pitch
+    // (same pitch can appear on different strings within a position)
+    var deduped = [];
+    for(var di = 0; di < sequence.length; di++){
+        if(di === 0 || sequence[di].midi !== sequence[di-1].midi){
+            deduped.push(sequence[di]);
+        }
+    }
+    return { sequence:deduped, positions:positions };
 }
 
 // Legacy fallback (used nowhere now, but kept for safety)
@@ -975,7 +1266,9 @@ function buildScalePracticeNotes(){
 }
 
 function buildChordPracticeSequence(){
-    const td = getTriadsForScale(state.harmKey, state.harmScaleType);
+    // Derive parent scale from Tab 1's own root/scaleType for chord practice
+    var practiceHarmScale = getParentScaleType(state.scaleType);
+    const td = getTriadsForScale(state.root, practiceHarmScale);
     if(!td) return [];
     return td.triads.map(function(ch, i){
         const rootIdx = ni(ch.root);
@@ -1250,7 +1543,7 @@ function renderPracticePanel(){
         if(state.practiceChordSeq && state.practiceChordSeq[state.practiceIdx]){
             var seqItem = state.practiceChordSeq[state.practiceIdx];
             // Look up the triad type from the harmonized scale data
-            var td = getTriadsForScale(state.harmKey, state.harmScaleType);
+            var td = getTriadsForScale(state.root, getParentScaleType(state.scaleType));
             if(td && td.triads[seqItem.chordIdx]){
                 goalTriadType = td.triads[seqItem.chordIdx].quality;
             }
@@ -1333,12 +1626,7 @@ function getNoteColor(note,primary,paired,pRoot,paRoot){
     if(inP&&inPa)return'clr-shared';return inP?'clr-scale':'clr-paired';
 }
 
-function syncHarmScaleType(){
-    const t=state.scaleType;
-    if(t==='minorPentatonic'||t==='blues'||t==='naturalMinor')state.harmScaleType='naturalMinor';
-    else if(t==='majorPentatonic'||t==='major')state.harmScaleType='major';
-    else state.harmScaleType=t;
-}
+// syncHarmScaleType removed — tabs are now independent
 
 // =====================================================================
 // DIATONIC CHORD LIBRARY ENGINE
@@ -1551,35 +1839,71 @@ function identifyChords(placedNotesArr){
 }
 
 // =====================================================================
+// TAB SWITCHING
+// =====================================================================
+window.switchTab = function(tabIdx){
+    activeTab = tabIdx;
+    for(var i = 1; i <= 5; i++){
+        var pane = document.getElementById('tabPane' + i);
+        if(pane) pane.className = 'tab-pane' + (i === tabIdx ? ' active' : '');
+    }
+    var btns = document.querySelectorAll('.main-tab-btn');
+    btns.forEach(function(b, idx){ b.classList.toggle('active', idx + 1 === tabIdx); });
+    // Render the newly active tab
+    renderActiveTab();
+};
+
+function renderActiveTab(){
+    switch(activeTab){
+        case 1: renderScalesTab(); break;
+        case 2: renderHarmonizedFullNeck(); break;
+        case 3: renderChordLibraryTab(); break;
+        case 4: renderReverseTab(); break;
+        case 5: break; // scroller is event-driven, no re-render needed
+    }
+}
+
+function renderScalesTab(){
+    renderModeButtons(); renderTheoryPanel(); renderFretboard();
+    if(state.practiceActive) renderPracticePanel();
+}
+
+// =====================================================================
 // CONTROLS & INIT
 // =====================================================================
 function initControls(){
+    // Tab 1: Scales & Practice controls
     const rs=document.getElementById('rootSelect');
     NOTES.forEach(function(n){
         const o=document.createElement('option');o.value=n;
         o.textContent=ENHARMONIC[n]?n+' / '+ENHARMONIC[n]:n;
         if(n===state.root)o.selected=true;rs.appendChild(o);
     });
-    rs.addEventListener('change',function(e){state.root=e.target.value;state.harmKey=e.target.value;state.clSelectedChord=null;render();});
+    rs.addEventListener('change',function(e){state.root=e.target.value;renderScalesTab();});
     document.getElementById('scaleSelect').addEventListener('change',function(e){
         state.scaleType=e.target.value;state.displayMode='primary';state.showRelative=false;
-        state.clSelectedChord=null;syncHarmScaleType();render();
+        renderScalesTab();
     });
     document.getElementById('toggleNotes').addEventListener('click',function(){
-        state.showNotes=!state.showNotes;this.classList.toggle('active',state.showNotes);render();
+        state.showNotes=!state.showNotes;this.classList.toggle('active',state.showNotes);renderScalesTab();
     });
     document.getElementById('toggleIntervals').addEventListener('click',function(){
-        state.showIntervals=!state.showIntervals;this.classList.toggle('active',state.showIntervals);render();
+        state.showIntervals=!state.showIntervals;this.classList.toggle('active',state.showIntervals);renderScalesTab();
+    });
+
+    // Tab 3: Chord Library controls (independent)
+    var clrs = document.getElementById('clRootSelect');
+    NOTES.forEach(function(n){
+        var o = document.createElement('option'); o.value = n;
+        o.textContent = ENHARMONIC[n] ? n+' / '+ENHARMONIC[n] : n;
+        if(n === clState.root) o.selected = true;
+        clrs.appendChild(o);
+    });
+    clrs.addEventListener('change', function(e){ clState.root = e.target.value; clState.clSelectedChord = null; renderChordLibraryTab(); });
+    document.getElementById('clScaleSelect').addEventListener('change', function(e){
+        clState.scaleType = e.target.value; clState.clSelectedChord = null; renderChordLibraryTab();
     });
 }
-
-window.setCLMode = function(m){
-    state.clMode=m;
-    document.getElementById('tabLibrary').classList.toggle('active',m==='library');
-    document.getElementById('tabReverse').classList.toggle('active',m==='reverse');
-    state.reverseNotes=[null,null,null,null,null,null];
-    renderChordLibrary();
-};
 
 // =====================================================================
 // RENDER: MODE BUTTONS
@@ -1756,11 +2080,11 @@ function renderLegend(){
 // =====================================================================
 // RENDER: CHORD LIBRARY
 // =====================================================================
-function renderChordLibrary(){
-    const content = document.getElementById('chordLibContent');
-    if(state.clMode==='reverse'){renderReverseChordFinder(content);return;}
+function renderChordLibraryTab(){
+    var content = document.getElementById('chordLibContent');
+    if(!content) return;
 
-    const data = getDiatonicChordsForKey(state.root, state.scaleType);
+    const data = getDiatonicChordsForKey(clState.root, clState.scaleType);
     if(!data){content.innerHTML='<div style="color:#666;text-align:center;padding:20px;">Not available for this scale.</div>';return;}
 
     var h = '';
@@ -1772,13 +2096,13 @@ function renderChordLibrary(){
             const ct = CHORD_TYPES[ch.type];
             if(!ct) return;
             const label = deg.root + ct.suffix;
-            const isActive = state.clSelectedChord && state.clSelectedChord.degreeIdx===di && state.clSelectedChord.chordType===ch.type;
+            const isActive = clState.clSelectedChord && clState.clSelectedChord.degreeIdx===di && clState.clSelectedChord.chordType===ch.type;
             h+='<button class="cl-chord-btn'+(isActive?' active':'')+'" onclick="selectLibChord('+di+',\''+ch.type+'\')">'+label+'</button>';
         });
         h+='</div>';
 
-        if(state.clSelectedChord && state.clSelectedChord.degreeIdx===di){
-            const selType = state.clSelectedChord.chordType;
+        if(clState.clSelectedChord && clState.clSelectedChord.degreeIdx===di){
+            const selType = clState.clSelectedChord.chordType;
             const ct = CHORD_TYPES[selType];
             if(ct){
                 const rootIdx = ni(deg.root);
@@ -1863,18 +2187,21 @@ function ordinal(n){
 }
 
 window.selectLibChord = function(degIdx, chordType){
-    if(state.clSelectedChord && state.clSelectedChord.degreeIdx===degIdx && state.clSelectedChord.chordType===chordType){
-        state.clSelectedChord = null;
+    if(clState.clSelectedChord && clState.clSelectedChord.degreeIdx===degIdx && clState.clSelectedChord.chordType===chordType){
+        clState.clSelectedChord = null;
     } else {
-        state.clSelectedChord = {degreeIdx:degIdx, chordType:chordType};
+        clState.clSelectedChord = {degreeIdx:degIdx, chordType:chordType};
     }
-    renderChordLibrary();
+    renderChordLibraryTab();
 };
 
 // =====================================================================
 // RENDER: REVERSE CHORD FINDER
 // =====================================================================
-function renderReverseChordFinder(container){
+function renderReverseTab(){
+    var container = document.getElementById('reverseContent');
+    if(!container) return;
+
     var h = '<div style="margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">';
     h += '<span style="font-size:13px;color:#aaa;">Click frets to place notes (one per string). Click again to remove.</span>';
     h += '<button class="mode-btn" onclick="clearReverse()">Clear All</button>';
@@ -1887,7 +2214,7 @@ function renderReverseChordFinder(container){
 
     STRINGS.forEach(function(str,si){
         const oi=ni(str.name);
-        const placed = state.reverseNotes[si];
+        const placed = reverseState.reverseNotes[si];
         h += '<div class="fb-string-row">';
         h += '<div class="fb-open" onclick="toggleReverseNote('+si+',0)">';
         if(placed===0){
@@ -1920,8 +2247,8 @@ function renderReverseChordFinder(container){
     // Play placed notes as chord
     const placed = [];
     for(var s=0;s<6;s++){
-        if(state.reverseNotes[s]!==null){
-            placed.push({string:s, fret:state.reverseNotes[s], note:noteAt(ni(STRINGS[s].name)+state.reverseNotes[s])});
+        if(reverseState.reverseNotes[s]!==null){
+            placed.push({string:s, fret:reverseState.reverseNotes[s], note:noteAt(ni(STRINGS[s].name)+reverseState.reverseNotes[s])});
         }
     }
 
@@ -1949,21 +2276,21 @@ function renderReverseChordFinder(container){
 }
 
 window.toggleReverseNote = function(stringIdx, fret){
-    if(state.reverseNotes[stringIdx] === fret){
-        state.reverseNotes[stringIdx] = null;
+    if(reverseState.reverseNotes[stringIdx] === fret){
+        reverseState.reverseNotes[stringIdx] = null;
     } else {
-        state.reverseNotes[stringIdx] = fret;
+        reverseState.reverseNotes[stringIdx] = fret;
     }
-    renderChordLibrary();
+    renderReverseTab();
 };
 
 window.clearReverse = function(){
-    state.reverseNotes = [null,null,null,null,null,null];
-    renderChordLibrary();
+    reverseState.reverseNotes = [null,null,null,null,null,null];
+    renderReverseTab();
 };
 
 window.playReverseChord = function(){
-    const frets = state.reverseNotes.map(function(f){ return f === null ? -1 : f; });
+    const frets = reverseState.reverseNotes.map(function(f){ return f === null ? -1 : f; });
     const midiArr = [];
     frets.forEach(function(f, s){
         if(f >= 0) midiArr.push(getMidi(s, f));
@@ -2014,22 +2341,23 @@ function getAllTriadVoicingsOnNeck(cn,sgi,inv){
 
 function renderHarmonizedFullNeck(){
     const content=document.getElementById('harmContent');
-    const td=getTriadsForScale(state.harmKey,state.harmScaleType);
+    if(!content) return;
+    const td=getTriadsForScale(harmState.harmKey,harmState.harmScaleType);
     if(!td){content.innerHTML='<div style="color:#666;text-align:center;padding:20px;">Not available.</div>';return;}
-    const triads=td.triads;const sg=STRING_GROUPS[state.harmStringGroup];const inv=state.harmInversion;
+    const triads=td.triads;const sg=STRING_GROUPS[harmState.harmStringGroup];const inv=harmState.harmInversion;
     const invNames=['Root Position','1st Inversion','2nd Inversion'];
     var h='<div class="harm-controls">';
     h+='<div class="control-group"><label>Key</label><select id="harmKeySelect">';
-    NOTES.forEach(function(n){const l=ENHARMONIC[n]?n+' / '+ENHARMONIC[n]:n;h+='<option value="'+n+'"'+(n===state.harmKey?' selected':'')+'>'+l+'</option>';});
+    NOTES.forEach(function(n){const l=ENHARMONIC[n]?n+' / '+ENHARMONIC[n]:n;h+='<option value="'+n+'"'+(n===harmState.harmKey?' selected':'')+'>'+l+'</option>';});
     h+='</select></div>';
     h+='<div class="control-group"><label>Parent Scale</label><select id="harmScaleSelect">';
-    ['major','naturalMinor','harmonicMinor'].forEach(function(t){h+='<option value="'+t+'"'+(t===state.harmScaleType?' selected':'')+'>'+SCALE_DEFS[t].name+'</option>';});
+    ['major','naturalMinor','harmonicMinor'].forEach(function(t){h+='<option value="'+t+'"'+(t===harmState.harmScaleType?' selected':'')+'>'+SCALE_DEFS[t].name+'</option>';});
     h+='</select></div>';
     h+='<div class="control-group"><label>Inversion</label><div class="btn-group">';
     invNames.forEach(function(n,i){h+='<button class="mode-btn'+(i===inv?' active':'')+'" onclick="setHarmInversion('+i+')">'+n+'</button>';});
     h+='</div></div></div>';
     h+='<div class="harm-sg-tabs">';
-    STRING_GROUPS.forEach(function(g,i){h+='<button class="sg-tab'+(i===state.harmStringGroup?' active':'')+'" onclick="setHarmStringGroup('+i+')">'+g.label+' Strings</button>';});
+    STRING_GROUPS.forEach(function(g,i){h+='<button class="sg-tab'+(i===harmState.harmStringGroup?' active':'')+'" onclick="setHarmStringGroup('+i+')">'+g.label+' Strings</button>';});
     h+='</div>';
 
     const cellMap={};const usedStrings=new Set(sg.indices);
@@ -2078,23 +2406,638 @@ function renderHarmonizedFullNeck(){
     });
     h+='</div>';
     content.innerHTML=h;
-    document.getElementById('harmKeySelect').addEventListener('change',function(e){state.harmKey=e.target.value;renderHarmonizedFullNeck();});
-    document.getElementById('harmScaleSelect').addEventListener('change',function(e){state.harmScaleType=e.target.value;renderHarmonizedFullNeck();});
+    document.getElementById('harmKeySelect').addEventListener('change',function(e){harmState.harmKey=e.target.value;renderHarmonizedFullNeck();});
+    document.getElementById('harmScaleSelect').addEventListener('change',function(e){harmState.harmScaleType=e.target.value;renderHarmonizedFullNeck();});
 }
 
-window.setHarmInversion=function(i){state.harmInversion=i;renderHarmonizedFullNeck();};
-window.setHarmStringGroup=function(i){state.harmStringGroup=i;renderHarmonizedFullNeck();};
+window.setHarmInversion=function(i){harmState.harmInversion=i;renderHarmonizedFullNeck();};
+window.setHarmStringGroup=function(i){harmState.harmStringGroup=i;renderHarmonizedFullNeck();};
 
 // =====================================================================
-// MAIN RENDER
+// LYRICS & CHORDS SCROLLER
+// =====================================================================
+(function(){
+    var scState = {
+        playing: false,
+        scrollY: 0,
+        speed: 1.0,        // 0.01–1.50x multiplier
+        fontSize: 'md',
+        animFrameId: null,
+        lastTime: 0,
+        tab: 'edit',
+        songs: [],
+        currentSongId: null,
+        // Metronome / Drum
+        metroOn: false,
+        drumMode: false,    // false = metronome clicks, true = drum beat
+        bpm: 120,
+        timeSig: '4/4',
+        metroTimerId: null,
+        metroBeat: 0,       // current beat index (0-based)
+        metroSubBeat: 0,    // sub-beat for 6/8 and drum eighths
+        audioCtx: null
+    };
+
+    // Load songs from localStorage
+    function scLoadLibrary(){
+        try {
+            var raw = localStorage.getItem('fretlord_songs');
+            if(raw) scState.songs = JSON.parse(raw);
+        } catch(e){ scState.songs = []; }
+        scPopulateSongSelect();
+    }
+    function scSaveLibrary(){
+        try { localStorage.setItem('fretlord_songs', JSON.stringify(scState.songs)); } catch(e){}
+    }
+    function scPopulateSongSelect(){
+        var sel = document.getElementById('scSongSelect');
+        sel.innerHTML = '<option value="">— New Song —</option>';
+        scState.songs.forEach(function(s){
+            var o = document.createElement('option');
+            o.value = s.id; o.textContent = s.name;
+            if(s.id === scState.currentSongId) o.selected = true;
+            sel.appendChild(o);
+        });
+    }
+
+    window.scLoadSelectedSong = function(){
+        var sel = document.getElementById('scSongSelect');
+        var id = sel.value;
+        if(!id){
+            scState.currentSongId = null;
+            document.getElementById('scSongName').value = '';
+            document.getElementById('scTextarea').value = '';
+            return;
+        }
+        var song = scState.songs.find(function(s){ return s.id === id; });
+        if(song){
+            scState.currentSongId = song.id;
+            document.getElementById('scSongName').value = song.name;
+            document.getElementById('scTextarea').value = song.text;
+        }
+    };
+
+    window.scSaveSong = function(){
+        var name = document.getElementById('scSongName').value.trim();
+        var text = document.getElementById('scTextarea').value;
+        if(!name){ alert('Please enter a song title.'); return; }
+        if(scState.currentSongId){
+            var song = scState.songs.find(function(s){ return s.id === scState.currentSongId; });
+            if(song){ song.name = name; song.text = text; }
+        } else {
+            var id = 'song_' + Date.now();
+            scState.songs.push({ id: id, name: name, text: text });
+            scState.currentSongId = id;
+        }
+        scSaveLibrary(); scPopulateSongSelect();
+    };
+
+    window.scRenameSong = function(){
+        if(!scState.currentSongId){ alert('No song selected to rename.'); return; }
+        var newName = document.getElementById('scSongName').value.trim();
+        if(!newName){ alert('Please enter a new name.'); return; }
+        var song = scState.songs.find(function(s){ return s.id === scState.currentSongId; });
+        if(song){ song.name = newName; scSaveLibrary(); scPopulateSongSelect(); }
+    };
+
+    window.scDeleteSong = function(){
+        if(!scState.currentSongId){ alert('No song selected to delete.'); return; }
+        var song = scState.songs.find(function(s){ return s.id === scState.currentSongId; });
+        if(!confirm('Delete "' + (song ? song.name : '') + '"?')) return;
+        scState.songs = scState.songs.filter(function(s){ return s.id !== scState.currentSongId; });
+        scState.currentSongId = null;
+        document.getElementById('scSongName').value = '';
+        document.getElementById('scTextarea').value = '';
+        scSaveLibrary(); scPopulateSongSelect();
+    };
+
+    // Parse chord-annotated text into display lines
+    function scParseText(text){
+        var lines = text.split('\n');
+        var result = [];
+        lines.forEach(function(line){
+            if(line.trim() === ''){
+                result.push({ type: 'empty' });
+                return;
+            }
+            // Extract chords and build chord line + lyric line
+            var chordLine = '';
+            var lyricLine = '';
+            var pos = 0;
+            var regex = /\[([^\]]+)\]/g;
+            var match;
+            var lastIdx = 0;
+            var hasChords = false;
+            while((match = regex.exec(line)) !== null){
+                hasChords = true;
+                // Add lyrics before this chord
+                var before = line.substring(lastIdx, match.index);
+                lyricLine += before;
+                // Position chord above the current lyric position
+                while(chordLine.length < lyricLine.length) chordLine += ' ';
+                chordLine += match[1];
+                lastIdx = match.index + match[0].length;
+            }
+            // Remaining lyrics after last chord
+            lyricLine += line.substring(lastIdx);
+            if(hasChords){
+                // Pad chord line if needed
+                while(chordLine.length < lyricLine.length) chordLine += ' ';
+                result.push({ type: 'chords', text: chordLine });
+                result.push({ type: 'lyrics', text: lyricLine });
+            } else {
+                result.push({ type: 'lyrics', text: line });
+            }
+        });
+        return result;
+    }
+
+    function scRenderDisplay(){
+        var text = document.getElementById('scTextarea').value;
+        var parsed = scParseText(text);
+        var inner = document.getElementById('scDisplayInner');
+        var html = '';
+        // Add top padding so content starts at bottom
+        html += '<div style="height:380px;"></div>';
+        parsed.forEach(function(line){
+            if(line.type === 'empty'){
+                html += '<div class="scroller-line scroller-line-empty"></div>';
+            } else if(line.type === 'chords'){
+                html += '<div class="scroller-line scroller-line-chords">' + scEscapeHtml(line.text) + '</div>';
+            } else {
+                html += '<div class="scroller-line scroller-line-lyrics">' + scEscapeHtml(line.text) + '</div>';
+            }
+        });
+        // Add bottom padding so content can scroll past
+        html += '<div style="height:420px;"></div>';
+        inner.innerHTML = html;
+    }
+
+    function scEscapeHtml(s){
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ── Speed helpers ──
+    // Slider is 1–150 (integer). We map it with a quadratic curve so the low end
+    // has fine control: sliderVal 1 → 0.01x, 100 → 1.00x, 150 → 1.50x
+    function scSliderToSpeed(v){
+        // 1-100 maps quadratically to 0.01-1.00  (fine grain at low end)
+        // 100-150 maps linearly to 1.00-1.50
+        v = Number(v);
+        if(v <= 100){
+            // quadratic: f(1)=0.01, f(100)=1.0
+            var t = (v - 1) / 99;          // 0..1
+            return 0.01 + 0.99 * t * t;    // quadratic ease-in
+        }
+        return 1.0 + (v - 100) * 0.01;     // linear 1.00–1.50
+    }
+
+    function scFormatSpeed(spd){
+        return spd.toFixed(2) + 'x';
+    }
+
+    // Base scroll rate at 1.0x  (px/sec) — feels comfortable for medium-tempo songs
+    var SC_BASE_PX_PER_SEC = 50;
+
+    // Scrolling animation
+    function scAnimate(timestamp){
+        if(!scState.playing) return;
+        if(scState.lastTime === 0) scState.lastTime = timestamp;
+        var dt = timestamp - scState.lastTime;
+        scState.lastTime = timestamp;
+        var pxPerSec = SC_BASE_PX_PER_SEC * scState.speed;
+        scState.scrollY += pxPerSec * (dt / 1000);
+        var inner = document.getElementById('scDisplayInner');
+        inner.style.transform = 'translateY(-' + scState.scrollY + 'px)';
+        scState.animFrameId = requestAnimationFrame(scAnimate);
+    }
+
+    window.scTogglePlay = function(){
+        if(scState.playing){
+            scState.playing = false;
+            if(scState.animFrameId){ cancelAnimationFrame(scState.animFrameId); scState.animFrameId = null; }
+            document.getElementById('scPlayBtn').textContent = 'Play';
+            document.getElementById('scPlayBtn').classList.remove('sc-active');
+            scMetroStop();
+        } else {
+            scState.playing = true;
+            scState.lastTime = 0;
+            document.getElementById('scPlayBtn').textContent = 'Pause';
+            document.getElementById('scPlayBtn').classList.add('sc-active');
+            scState.animFrameId = requestAnimationFrame(scAnimate);
+            if(scState.metroOn) scMetroStart();
+        }
+    };
+
+    window.scReset = function(){
+        scState.playing = false;
+        scState.scrollY = 0;
+        scState.lastTime = 0;
+        if(scState.animFrameId){ cancelAnimationFrame(scState.animFrameId); scState.animFrameId = null; }
+        var inner = document.getElementById('scDisplayInner');
+        inner.style.transform = 'translateY(0)';
+        document.getElementById('scPlayBtn').textContent = 'Play';
+        document.getElementById('scPlayBtn').classList.remove('sc-active');
+        scMetroStop();
+    };
+
+    window.scUpdateSpeed = function(){
+        var raw = parseInt(document.getElementById('scSpeedSlider').value);
+        scState.speed = scSliderToSpeed(raw);
+        document.getElementById('scSpeedVal').textContent = scFormatSpeed(scState.speed);
+    };
+
+    window.scSetFont = function(size){
+        scState.fontSize = size;
+        var display = document.getElementById('scDisplay');
+        display.className = 'scroller-display scroller-font-' + size;
+        var btns = document.querySelectorAll('.sc-font-btn');
+        btns.forEach(function(b){ b.classList.remove('active'); });
+        var labels = { sm: 'S', md: 'M', lg: 'L' };
+        btns.forEach(function(b){ if(b.textContent === labels[size]) b.classList.add('active'); });
+    };
+
+    window.setScrollerTab = function(tab){
+        scState.tab = tab;
+        document.getElementById('scrollerEditView').style.display = tab === 'edit' ? 'block' : 'none';
+        document.getElementById('scrollerScrollView').style.display = tab === 'scroll' ? 'block' : 'none';
+        document.getElementById('scTabEdit').classList.toggle('active', tab === 'edit');
+        document.getElementById('scTabScroll').classList.toggle('active', tab === 'scroll');
+        if(tab === 'scroll'){
+            scReset();
+            scRenderDisplay();
+            scBuildBeatIndicator();
+        }
+    };
+
+    // toggleScrollerPanel removed — tab system handles visibility
+
+    // =====================================================================
+    // METRONOME & DRUM BEAT ENGINE  (Web Audio API — fully synthesized)
+    // =====================================================================
+
+    function scGetAudioCtx(){
+        if(!scState.audioCtx){
+            scState.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if(scState.audioCtx.state === 'suspended') scState.audioCtx.resume();
+        return scState.audioCtx;
+    }
+
+    // ── Metronome click synthesis ──
+    function scPlayClick(accent){
+        var ctx = scGetAudioCtx();
+        var t = ctx.currentTime;
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        if(accent){
+            osc.frequency.value = 1500;
+            gain.gain.setValueAtTime(0.7, t);
+        } else {
+            osc.frequency.value = 1000;
+            gain.gain.setValueAtTime(0.35, t);
+        }
+        osc.type = 'sine';
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+        osc.start(t);
+        osc.stop(t + 0.06);
+    }
+
+    // ── Drum synthesis helpers ──
+    function scPlayKick(){
+        var ctx = scGetAudioCtx();
+        var t = ctx.currentTime;
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, t);
+        osc.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+        gain.gain.setValueAtTime(0.8, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+        osc.start(t);
+        osc.stop(t + 0.25);
+    }
+
+    function scPlaySnare(){
+        var ctx = scGetAudioCtx();
+        var t = ctx.currentTime;
+        // Noise burst
+        var bufSize = ctx.sampleRate * 0.08;
+        var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        var data = buf.getChannelData(0);
+        for(var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+        var noise = ctx.createBufferSource();
+        noise.buffer = buf;
+        var noiseGain = ctx.createGain();
+        noise.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+        noiseGain.gain.setValueAtTime(0.5, t);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+        noise.start(t);
+        noise.stop(t + 0.1);
+        // Body tone
+        var osc = ctx.createOscillator();
+        var oscGain = ctx.createGain();
+        osc.connect(oscGain);
+        oscGain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(180, t);
+        osc.frequency.exponentialRampToValueAtTime(60, t + 0.06);
+        oscGain.gain.setValueAtTime(0.45, t);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+        osc.start(t);
+        osc.stop(t + 0.08);
+    }
+
+    function scPlayHiHat(){
+        var ctx = scGetAudioCtx();
+        var t = ctx.currentTime;
+        var bufSize = ctx.sampleRate * 0.04;
+        var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        var data = buf.getChannelData(0);
+        for(var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+        var noise = ctx.createBufferSource();
+        noise.buffer = buf;
+        // Highpass via biquad
+        var hp = ctx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.value = 7000;
+        var gain = ctx.createGain();
+        noise.connect(hp);
+        hp.connect(gain);
+        gain.connect(ctx.destination);
+        gain.gain.setValueAtTime(0.22, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+        noise.start(t);
+        noise.stop(t + 0.04);
+    }
+
+    // ── Beat‐count helpers ──
+    function scBeatsPerMeasure(){
+        switch(scState.timeSig){
+            case '2/4': return 2;
+            case '3/4': return 3;
+            case '6/8': return 6;
+            default:    return 4; // 4/4
+        }
+    }
+
+    // For drum patterns we think in eighth-note subdivisions per measure
+    function scSubBeatsPerMeasure(){
+        switch(scState.timeSig){
+            case '2/4': return 4;   // 2 quarter notes × 2 eighths
+            case '3/4': return 6;   // 3 × 2
+            case '6/8': return 6;   // 6 eighth notes
+            default:    return 8;   // 4 × 2
+        }
+    }
+
+    // Interval between sub-beats (ms)
+    function scSubBeatInterval(){
+        var bpm = scState.bpm;
+        if(scState.timeSig === '6/8'){
+            // In 6/8, beat = dotted quarter (3 eighths). BPM refers to dotted-quarter beats.
+            // So an eighth = 60000 / (bpm * 3)
+            return 60000 / (bpm * 3);
+        }
+        // For x/4 sigs, BPM = quarter notes. Eighth = half a quarter.
+        return 60000 / (bpm * 2);
+    }
+
+    // Beat interval for metronome mode (one click per beat)
+    function scBeatInterval(){
+        var bpm = scState.bpm;
+        if(scState.timeSig === '6/8'){
+            // BPM = dotted quarter beats, each = 3 eighth notes
+            return 60000 / bpm;
+        }
+        return 60000 / bpm;
+    }
+
+    // ── Beat indicator dots ──
+    function scBuildBeatIndicator(){
+        var container = document.getElementById('scBeatIndicator');
+        if(!container) return;
+        var n = scBeatsPerMeasure();
+        var html = '';
+        for(var i = 0; i < n; i++){
+            html += '<span class="sc-beat-dot" id="scBeatDot'+i+'"></span>';
+        }
+        container.innerHTML = html;
+    }
+
+    function scLightBeat(beatIdx, accent){
+        var n = scBeatsPerMeasure();
+        for(var i = 0; i < n; i++){
+            var dot = document.getElementById('scBeatDot'+i);
+            if(dot) dot.className = 'sc-beat-dot' + (i === beatIdx ? (accent ? ' accent' : ' lit') : '');
+        }
+    }
+
+    function scClearBeatIndicator(){
+        var n = scBeatsPerMeasure();
+        for(var i = 0; i < n; i++){
+            var dot = document.getElementById('scBeatDot'+i);
+            if(dot) dot.className = 'sc-beat-dot';
+        }
+    }
+
+    // ── Drum beat patterns (indexed by sub-beat) ──
+    // Returns { kick:bool, snare:bool, hihat:bool }
+    function scDrumHit(subBeat){
+        var sig = scState.timeSig;
+        if(sig === '4/4'){
+            // Classic rock: K on 1,3 (sub 0,4), S on 2,4 (sub 2,6), HH every eighth
+            return {
+                kick:  subBeat === 0 || subBeat === 4,
+                snare: subBeat === 2 || subBeat === 6,
+                hihat: true
+            };
+        }
+        if(sig === '2/4'){
+            // K on 1 (sub 0), S on 2 (sub 2), HH every eighth
+            return {
+                kick:  subBeat === 0,
+                snare: subBeat === 2,
+                hihat: true
+            };
+        }
+        if(sig === '3/4'){
+            // Waltz: K on 1 (sub 0), snare on 2,3 (sub 2,4), HH every eighth
+            return {
+                kick:  subBeat === 0,
+                snare: subBeat === 2 || subBeat === 4,
+                hihat: true
+            };
+        }
+        if(sig === '6/8'){
+            // 6/8 feel: K on 1 (sub 0), snare on 4 (sub 3), HH every eighth
+            return {
+                kick:  subBeat === 0,
+                snare: subBeat === 3,
+                hihat: true
+            };
+        }
+        return { kick:false, snare:false, hihat:true };
+    }
+
+    // Which beat-dot lights up for a given sub-beat
+    function scSubBeatToBeat(subBeat){
+        var sig = scState.timeSig;
+        if(sig === '6/8'){
+            // beats are groups of 3 eighths: beat 0 = sub 0-2, beat 1 = sub 3-5, etc.
+            return Math.floor(subBeat / 3);
+        }
+        // x/4: every 2 sub-beats = 1 beat
+        return Math.floor(subBeat / 2);
+    }
+
+    // ── Start / stop ──
+    function scMetroStart(){
+        scMetroStop();
+        scState.metroBeat = 0;
+        scState.metroSubBeat = 0;
+
+        if(scState.drumMode){
+            // Drum mode: fire on every sub-beat (eighth note)
+            var interval = scSubBeatInterval();
+            var totalSub = scSubBeatsPerMeasure();
+            // Play first hit immediately
+            scFireDrumSubBeat();
+            scState.metroTimerId = setInterval(function(){
+                scState.metroSubBeat = (scState.metroSubBeat + 1) % totalSub;
+                scFireDrumSubBeat();
+            }, interval);
+        } else {
+            // Metronome mode: fire on every beat
+            var interval = scBeatInterval();
+            var totalBeats = scBeatsPerMeasure();
+            // First beat immediately
+            scPlayClick(true);
+            scLightBeat(0, true);
+            scState.metroBeat = 1;
+            scState.metroTimerId = setInterval(function(){
+                var beat = scState.metroBeat % totalBeats;
+                var accent = (beat === 0);
+                scPlayClick(accent);
+                scLightBeat(beat, accent);
+                scState.metroBeat = (scState.metroBeat + 1);
+            }, interval);
+        }
+    }
+
+    function scFireDrumSubBeat(){
+        var sub = scState.metroSubBeat;
+        var hit = scDrumHit(sub);
+        if(hit.kick)  scPlayKick();
+        if(hit.snare) scPlaySnare();
+        if(hit.hihat) scPlayHiHat();
+        var beatIdx = scSubBeatToBeat(sub);
+        // Only light on the first sub-beat of each beat
+        var isFirst;
+        if(scState.timeSig === '6/8'){
+            isFirst = (sub % 3 === 0);
+        } else {
+            isFirst = (sub % 2 === 0);
+        }
+        if(isFirst){
+            scLightBeat(beatIdx, beatIdx === 0);
+        }
+    }
+
+    function scMetroStop(){
+        if(scState.metroTimerId){ clearInterval(scState.metroTimerId); scState.metroTimerId = null; }
+        scClearBeatIndicator();
+    }
+
+    // Restart metro if currently playing (e.g. after BPM/timesig change)
+    function scMetroRestart(){
+        if(scState.metroOn && scState.playing){
+            scMetroStart();
+        }
+    }
+
+    // ── UI handlers ──
+    window.scToggleMetro = function(){
+        scState.metroOn = !scState.metroOn;
+        document.getElementById('scMetroBtn').classList.toggle('active', scState.metroOn);
+        if(scState.metroOn && scState.playing){
+            scMetroStart();
+        } else {
+            scMetroStop();
+        }
+    };
+
+    window.scToggleDrumMode = function(){
+        scState.drumMode = !scState.drumMode;
+        document.getElementById('scDrumBtn').classList.toggle('active', scState.drumMode);
+        scMetroRestart();
+    };
+
+    window.scUpdateBpm = function(){
+        var v = parseInt(document.getElementById('scBpmInput').value) || 120;
+        v = Math.max(20, Math.min(300, v));
+        scState.bpm = v;
+        scMetroRestart();
+    };
+
+    window.scUpdateTimeSig = function(){
+        scState.timeSig = document.getElementById('scTimeSigSelect').value;
+        scBuildBeatIndicator();
+        scMetroRestart();
+    };
+
+    // Keyboard shortcuts (only when lyrics tab is active and scroll sub-tab active)
+    document.addEventListener('keydown', function(e){
+        // Check if Tab 5 (Lyrics) is the active tab
+        var pane5 = document.getElementById('tabPane5');
+        if(!pane5 || pane5.style.display === 'none' || !pane5.classList.contains('active')) return;
+        if(scState.tab !== 'scroll') return;
+        // Don't capture when typing in inputs
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+        if(e.code === 'Space'){
+            e.preventDefault();
+            scTogglePlay();
+        } else if(e.code === 'KeyR'){
+            e.preventDefault();
+            scReset();
+        } else if(e.code === 'KeyM'){
+            e.preventDefault();
+            scToggleMetro();
+        } else if(e.code === 'ArrowUp'){
+            e.preventDefault();
+            var slider = document.getElementById('scSpeedSlider');
+            var v = Math.min(150, parseInt(slider.value) + 1);
+            slider.value = v;
+            scUpdateSpeed();
+        } else if(e.code === 'ArrowDown'){
+            e.preventDefault();
+            var slider = document.getElementById('scSpeedSlider');
+            var v = Math.max(1, parseInt(slider.value) - 1);
+            slider.value = v;
+            scUpdateSpeed();
+        }
+    });
+
+    // Initialize
+    scLoadLibrary();
+    scBuildBeatIndicator();
+})();
+
+// =====================================================================
+// MAIN RENDER (legacy — now only renders Tab 1)
 // =====================================================================
 function render(){
-    renderModeButtons();renderTheoryPanel();renderFretboard();
-    renderChordLibrary();renderHarmonizedFullNeck();
-    if(state.practiceActive) renderPracticePanel();
+    renderScalesTab();
 }
 
-syncHarmScaleType();initControls();render();
+initControls();
+switchTab(1);
 </script>
 </body>
 </html>
