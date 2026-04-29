@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables (contains secrets/config)
+.env
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test audio files (too large for git)
+*.wav
+*.mp3
+
+# Editor files
+*.swp
+*.swo
+*~
